@@ -1,0 +1,42 @@
+name: Setup ArchivesSpace and optional plugin
+description: Checks out version of ArchivesSpace and an optional plugin
+inputs:
+  archivesspace-version:
+    description: Target ArchivesSpace version
+    required: true
+  db-port:
+    description: Port of test db
+    required: false
+  plugin:
+    description: Optional plugin to checkout and add to config
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Allow ArchivesSpace functions for app db user
+      if: ${{ inputs.db-port }}
+      shell: bash
+      run: |
+        mysql --host 127.0.0.1 --port ${{ inputs.db-port }} -uroot -proot -e "SET GLOBAL log_bin_trust_function_creators = 1;"
+
+    - name: Checkout ArchivesSpace
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.archivesspace-version }}
+        repository: Smithsonian/archivesspace
+  
+    - name: Checkout plugin
+      if: ${{ inputs.plugin }}
+      uses: actions/checkout@v4
+      with:
+        path: ${{ inputs.plugin }}
+
+    - name: Copy plugin to ArchivesSpace and add to config
+      if: ${{ inputs.plugin }}
+      shell: bash
+      run: |
+        cp -r ${{ github.workspace }}/${{ inputs.plugin }} ${{ github.workspace }}/plugins
+        cd ./common/config/
+        touch config.rb
+        echo "AppConfig[:plugins] = ['${{ inputs.plugin }}']" > config.rb

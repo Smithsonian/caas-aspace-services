@@ -1,33 +1,32 @@
-name: 'Bootstrap ArchivesSpace ci environment'
-description: 'Downloads gems and mysql connector and caches them'
+name: Bootstrap ArchivesSpace ci environment
+description: Downloads gems and mysql connector and caches them
 inputs:
   mysql-connector-url:
-    description: 'URL for mysql connector'
+    description: URL for mysql connector
     required: true
     default: 'https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.30/mysql-connector-java-8.0.30.jar'
   backend:
-    description: "install backend gems"
-    default: false
+    description: install backend gems
+    default: 'false'
   frontend:
-    description: "install frontend gems"
-    default: false
+    description: install frontend gems
+    default: 'false'
   public:
-    description: "install public gems"
-    default: false
+    description: install public gems
+    default: 'false'
   indexer:
-    description: "install indexer gems"
-    default: false
+    description: install indexer gems
+    default: 'false'
   oai:
-    description: "install oai gems"
-    default: false
+    description: install oai gems
+    default: 'false'
   java-version:
     description: Java version to install
     required: true
-    type: string
     default: '11'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Cache JRuby
       id: cache-jruby
