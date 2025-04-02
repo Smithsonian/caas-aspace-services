@@ -1,10 +1,27 @@
-WIP.  Used to run aspace backing services (mysql and solr) in containers.  Docker Desktop not required.
+A repository used to hold shared workflows, actions, backing services, and other tbd utilities for managing, testing,
+and local development related to ArchivesSpace at the Smithsonian.  As a general rule of thumb, if you find yourself
+copying the same thing across multiple SI ASpace repositories, rather than copy-pasting, put it here.
 
-# Prerequisites for running with Colima/Docker CLI (recommended)
+## Shared Github Workflows and Actions
+See: .github
+
+In order to avoid duplicating common actions across multiple repositories, we've abstracted out reusable workflows
+and actions into this repository.  Detailed documentation, including examples on calling these actions, is maintained 
+in this repository's Wiki.
+
+## Backing services  
+See: docker-compose.yml
+
+Can be used in place of the ASpace core Docker containers for mysql and solr, should that be desired.  Whether using
+this compose file, or that in core ArchivesSpace, Docker Desktop is not required.
+
+# Prerequisites for running with Colima/Docker CLI (recommended) on MacOS
 1. Install colima (homebrew recommended): https://github.com/abiosoft/colima
 2. Install docker cli via brew: `brew install docker`
 3. Install docker-compose via brew: `brew install docker-compose`
 4. Start colima: `colima start`
+   * Additional colima configuration options are available in the [README.md](https://github.com/abiosoft/colima/blob/main/README.md), but you may wish to add additional CPUs
+   and memory for best results with ASpace: `colima start --cpu 4 --memory 8`
 
 # Quick Start
 1. From the root dir of this repo, `docker compose up` (add `-d` flag to run in background/detached)
