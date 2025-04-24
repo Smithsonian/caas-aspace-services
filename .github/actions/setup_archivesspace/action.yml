@@ -10,10 +10,18 @@ inputs:
   plugin:
     description: Optional plugin to checkout and add to config
     required: false
+  solr-enabled:
+    description: Is solr enabled?
+    required: false
 
 runs:
   using: 'composite'
   steps:
+    - uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.java-version || 11 }}
+        distribution: temurin
+
     - name: Allow ArchivesSpace functions for app db user
       if: ${{ inputs.db-port }}
       shell: bash
@@ -25,6 +33,22 @@ runs:
       with:
         ref: ${{ inputs.archivesspace-version }}
         repository: Smithsonian/archivesspace
+    
+    - name: Copy solr config from workspace to solr service
+      if: ${{ inputs.solr-enabled }}
+      shell: bash
+      env:
+        SOLR_ID: ${{ job.services.solr.id }}
+      run: |
+        docker cp solr $SOLR_ID:/solr_conf_from_repo
+  
+    - name: Create ArchivesSpace Solr core
+      if: ${{ inputs.solr-enabled }}
+      shell: bash
+      env:
+        SOLR_ID: ${{ job.services.solr.id }}
+      run: |
+        docker exec --tty $SOLR_ID solr create_core -p 8983 -c archivesspace -d /solr_conf_from_repo
   
     - name: Checkout plugin
       if: ${{ inputs.plugin }}
