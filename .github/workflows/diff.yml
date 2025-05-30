@@ -2,12 +2,16 @@ name: Diff modified views
 
 on:
   workflow_call:
+    inputs:
+      prod_archivesspace_version:
+        required: false
+        type: string
 
 jobs:
   diff:
     runs-on: ubuntu-latest
     env:
-      PROD_ARCHIVESSPACE_VERSION: v3.3.1
+      PROD_ARCHIVESSPACE_VERSION: ${{ inputs.prod_archivesspace_version || 'v3.3.1' }}
     continue-on-error: true
     strategy:
       matrix:
