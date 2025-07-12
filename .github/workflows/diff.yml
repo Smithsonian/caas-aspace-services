@@ -11,11 +11,11 @@ jobs:
   diff:
     runs-on: ubuntu-latest
     env:
-      PROD_ARCHIVESSPACE_VERSION: ${{ inputs.prod_archivesspace_version || 'v3.3.1' }}
+      PROD_ARCHIVESSPACE_VERSION: ${{ inputs.prod_archivesspace_version || 'v4.1.0' }}
     continue-on-error: true
     strategy:
       matrix:
-        archivesspace_version: [v3.3.1, v4.0.0, v4.1.0]
+        archivesspace_version: [v4.1.0, v4.1.1]
     steps:
 
     - name: Checkout current plugin
