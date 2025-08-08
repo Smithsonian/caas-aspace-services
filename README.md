@@ -27,6 +27,19 @@ this compose file, or that in core ArchivesSpace, Docker Desktop is not required
 1. From the root dir of this repo, `docker compose up` (add `-d` flag to run in background/detached)
     * NOTE: On first startup solr will come up without a core, shut down, then restart again with the new archivessspace core applied.  Give it *time* on the very first startup.  You may also wish to skip running in detached mode so that you can follow along in the logging during this startup process.
 
+## A note on Solr schema versions
+The `solr/` dir present in this repo comes from our current ASpace production version (v4.1.0).  If you wish to run against a different version, you can overwrite this dir like so:
+```
+mkdir newconfig && cd newconfig
+git clone --no-checkout https://github.com/Smithsonian/archivesspace.git --branch <desired_tag_version> --depth=1 .
+git sparse-checkout init --no-cone
+git sparse-checkout set solr/solrconfig.xml solr/schema.xml solr/stopwords.txt solr/synonyms.txt
+git checkout
+mv solr/* ../solr
+cd ..
+rm -rf newconfig
+```
+
 # Stop without removing containers
 1. Stop containers with `docker compose stop`
 2. Stop colima with `colima stop`
