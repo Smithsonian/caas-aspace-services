@@ -1,0 +1,1828 @@
+{
+	"info": {
+		"_postman_id": "d026b975-9332-4cfa-8eb7-2dbe0f54afbf",
+		"name": "SeedAspaceData",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17587716"
+	},
+	"item": [
+		{
+			"name": "Authenticate",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();",
+							"pm.environment.set(\"SESSION\", jsonData.session);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"resetValue\",pm.collectionVariables.toJSON().values)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/users/{{USER}}/login?password={{PW}}",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"users",
+						"{{USER}}",
+						"login"
+					],
+					"query": [
+						{
+							"key": "password",
+							"value": "{{PW}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Repository",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseData = pm.response.json();",
+							"const repository_id = responseData.id",
+							"",
+							"pm.collectionVariables.set(\"REPOSITORY_ID\", repository_id);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Test repository {{$randomInt}}\",\n  \"is_slug_auto\": true,\n  \"repo_code\": \"test_repo_{{$randomInt}}\",\n  \"country\": \"US\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/repositories",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"repositories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Defined Number of Accessions",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var currentCount = pm.collectionVariables.get(\"ACCESSION_COUNT\")",
+							"if (currentCount > 0){",
+							"    currentCount = currentCount -1 ;",
+							"    pm.collectionVariables.set(\"ACCESSION_COUNT\", currentCount);",
+							"    pm.execution.setNextRequest(\"Create a Defined Number of Accessions\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Test accession {{ACCESSION_COUNT}}\",\n    \"accession_date\": \"2025-07-18\",\n    \"id_0\": \"{{ACCESSION_COUNT}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/repositories/{{REPOSITORY_ID}}/accessions",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"repositories",
+						"{{REPOSITORY_ID}}",
+						"accessions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Defined Number of Resources",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var currentCount = pm.collectionVariables.get(\"RESOURCE_COUNT\")",
+							"if (currentCount > 0){",
+							"    currentCount = currentCount -1 ;",
+							"    pm.collectionVariables.set(\"RESOURCE_COUNT\", currentCount);",
+							"    pm.execution.setNextRequest(\"Create a Defined Number of Resources\");",
+							"}",
+							"pm.collectionVariables.set(\"LAST_RESOURCE\", pm.response.json()['id'])",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Test resource {{RESOURCE_COUNT}}\",\n    \"ead_id\": \"EAD.{{RESOURCE_COUNT}}\",\n    \"id_0\": \"EAD\",\n    \"id_1\": \"{{RESOURCE_COUNT}}\",\n    \"level\": \"collection\",\n    \"finding_aid_language\": \"eng\",\n    \"finding_aid_script\": \"Latn\",\n    \"extents\": [\n        {\n            \"portion\": \"whole\",\n            \"number\": \"1\",\n            \"extent_type\": \"cubic_feet\"\n        }\n    ],\n    \"lang_materials\": [\n        {\n            \"language_and_script\": {\n                \"language\": \"eng\",\n                \"jsonmodel_type\": \"language_and_script\"\n            }\n        }\n    ],\n    \"dates\": [\n        {\n            \"begin\": \"1906-10-29\",\n            \"end\": \"1907-03-03\",\n            \"date_type\": \"inclusive\",\n            \"label\": \"creation\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/repositories/{{REPOSITORY_ID}}/resources",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"repositories",
+						"{{REPOSITORY_ID}}",
+						"resources"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Defined Number of Archival Objects Attached to Last Resource",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var currentCount = pm.collectionVariables.get(\"AO_COUNT\")",
+							"if (currentCount > 0){",
+							"    currentCount = currentCount -1 ;",
+							"    pm.collectionVariables.set(\"AO_COUNT\", currentCount);",
+							"    pm.execution.setNextRequest(\"Create a Defined Number of Archival Objects Attached to Last Resource\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Test AO {{AO_COUNT}}\",\n    \"level\": \"file\",\n    \"resource\": {\n        \"ref\": \"/repositories/2/resources/{{LAST_RESOURCE}}\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/repositories/{{REPOSITORY_ID}}/archival_objects",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"repositories",
+						"{{REPOSITORY_ID}}",
+						"archival_objects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Defined Number of Digital Objects",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var currentCount = pm.collectionVariables.get(\"DO_COUNT\")",
+							"if (currentCount > 0){",
+							"    currentCount = currentCount -1 ;",
+							"    pm.collectionVariables.set(\"DO_COUNT\", currentCount);",
+							"    pm.execution.setNextRequest(\"Create a Defined Number of Digital Objects\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Test DO {{DO_COUNT}}\",\n    \"digital_object_id\": \"DOID_{{$randomInt}}\",\n    \"publish\": true,\n    \"digital_object_type\": \"still_image\",\n    \"file_versions\": [\n        {\n            \"file_uri\": \"https://example.com/{{DO_COUNT}}\",\n            \"publish\": true,\n            \"use_statement\": \"image-service\",\n            \"jsonmodel_type\": \"file_version\",\n            \"is_representative\": true\n        },\n        {\n            \"file_uri\": \"https://example.com/{{DO_COUNT}}/2\",\n            \"publish\": true,\n            \"use_statement\": \"video-service\",\n            \"jsonmodel_type\": \"file_version\",\n            \"is_representative\": false\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/repositories/{{REPOSITORY_ID}}/digital_objects",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"repositories",
+						"{{REPOSITORY_ID}}",
+						"digital_objects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Defined Number of Classifications",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var currentCount = pm.collectionVariables.get(\"CLASSIFICATION_COUNT\")",
+							"if (currentCount > 0){",
+							"    currentCount = currentCount -1 ;",
+							"    pm.collectionVariables.set(\"CLASSIFICATION_COUNT\", currentCount);",
+							"    pm.execution.setNextRequest(\"Create a Defined Number of Classifications\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Test Classification {{CLASSIFICATION_COUNT}}\",\n    \"identifier\": \"{{$randomInt}}\",\n    \"creator\": {\n        \"ref\": \"/agents/people/1\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/repositories/{{REPOSITORY_ID}}/classifications",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"repositories",
+						"{{REPOSITORY_ID}}",
+						"classifications"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Defined Number of Container Profiles",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var currentCount = pm.collectionVariables.get(\"CONTAINER_PROFILE_COUNT\")",
+							"if (currentCount > 0){",
+							"    currentCount = currentCount -1 ;",
+							"    pm.collectionVariables.set(\"CONTAINER_PROFILE_COUNT\", currentCount);",
+							"    pm.execution.setNextRequest(\"Create a Defined Number of Container Profiles\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Profile {{CONTAINER_PROFILE_COUNT}}\",\n    \"extent_dimension\": \"width\",\n    \"height\": \"1.{{CONTAINER_PROFILE_COUNT}}\",\n    \"width\": \"2.{{CONTAINER_PROFILE_COUNT}}\",\n    \"depth\": \"3.{{CONTAINER_PROFILE_COUNT}}\",\n    \"dimension_units\": \"feet\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/container_profiles",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"container_profiles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Defined Number of Location Profiles",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var currentCount = pm.collectionVariables.get(\"LOCATION_PROFILE_COUNT\")",
+							"if (currentCount > 0){",
+							"    currentCount = currentCount -1 ;",
+							"    pm.collectionVariables.set(\"LOCATION_PROFILE_COUNT\", currentCount);",
+							"    pm.execution.setNextRequest(\"Create a Defined Number of Location Profiles\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Profile {{LOCATION_PROFILE_COUNT}}\",\n    \"extent_dimension\": \"width\",\n    \"height\": \"1.{{LOCATION_PROFILE_COUNT}}\",\n    \"width\": \"2.{{LOCATION_PROFILE_COUNT}}\",\n    \"depth\": \"3.{{LOCATION_PROFILE_COUNT}}\",\n    \"dimension_units\": \"feet\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/location_profiles",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"location_profiles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Defined Number of Locations",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var currentCount = pm.collectionVariables.get(\"LOCATION_COUNT\")",
+							"if (currentCount > 0){",
+							"    currentCount = currentCount -1 ;",
+							"    pm.collectionVariables.set(\"LOCATION_COUNT\", currentCount);",
+							"    pm.execution.setNextRequest(\"Create a Defined Number of Locations\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const getLocationProfiles = {",
+							"    url: pm.environment.get(\"ASPACE_BACKEND_URL\") + \"/location_profiles?page=1\",",
+							"    method: 'GET',",
+							"    header: {",
+							"        'Content-Type': 'application/json',",
+							"        'X-ArchivesSpace-Session': pm.environment.get(\"SESSION\")",
+							"    }",
+							"};",
+							"",
+							"pm.sendRequest(getLocationProfiles, function (err, response) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        const responseData = response.json();",
+							"        if (responseData && responseData.results.length > 0) {",
+							"            const randomIndex = Math.floor(Math.random() * responseData.results.length);",
+							"            pm.variables.set(\"location_profile\", responseData.results[randomIndex].uri);",
+							"        } else {",
+							"            pm.variables.set(\"location_profile\", \"\");",
+							"        }",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"building\": \"Research Center\",\n    \"floor\": \"Floor {{LOCATION_COUNT}}\",\n    \"room\": \"Storage Room {{LOCATION_COUNT}}\",\n    \"barcode\": \"{{$randomInt}}\",\n    \"coordinate_1_label\": \"Range\",\n    \"coordinate_1_indicator\": \"1\",\n    \"coordinate_2_label\": \"Section\",\n    \"coordinate_2_indicator\": \"A\",\n    \"coordinate_3_label\": \"Shelf\",\n    \"coordinate_3_indicator\": \"1\",\n    \"external_ids\": [],\n    \"functions\": [],\n    \"location_profile\": {\n        \"ref\": \"{{location_profile}}\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/locations",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"locations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Defined Number of Top Containers",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var currentCount = pm.collectionVariables.get(\"CONTAINER_COUNT\")",
+							"if (currentCount > 0){",
+							"    currentCount = currentCount -1 ;",
+							"    pm.collectionVariables.set(\"CONTAINER_COUNT\", currentCount);",
+							"    pm.execution.setNextRequest(\"Create a Defined Number of Top Containers\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Subject sources",
+							"var containerType = [\"box\", \"carton\", \"case\", \"folder\", \"frame\", \"object\", \"reel\"];",
+							"var randomContainerType = _.sample(containerType);",
+							"",
+							"// Set the selected item as an collection variable",
+							"pm.variables.set(\"container_type\", randomContainerType);",
+							"",
+							"const getLocations = {",
+							"    url: pm.environment.get(\"ASPACE_BACKEND_URL\") + \"/locations?page=1\",",
+							"    method: 'GET',",
+							"    header: {",
+							"        'Content-Type': 'application/json',",
+							"        'X-ArchivesSpace-Session': pm.environment.get(\"SESSION\")",
+							"    }",
+							"};",
+							"",
+							"pm.sendRequest(getLocations, function (err, response) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        const responseData = response.json();",
+							"        if (responseData && responseData.results.length > 0) {",
+							"            const randomIndex = Math.floor(Math.random() * responseData.results.length);",
+							"            pm.variables.set(\"location\", responseData.results[randomIndex].uri);",
+							"        } else {",
+							"            pm.variables.set(\"location\", \"\");",
+							"        }",
+							"    }",
+							"});",
+							"",
+							"const getContainerProfiles = {",
+							"    url: pm.environment.get(\"ASPACE_BACKEND_URL\") + \"/container_profiles?page=1\",",
+							"    method: 'GET',",
+							"    header: {",
+							"        'Content-Type': 'application/json',",
+							"        'X-ArchivesSpace-Session': pm.environment.get(\"SESSION\")",
+							"    }",
+							"};",
+							"",
+							"pm.sendRequest(getContainerProfiles, function (err, response) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        const responseData = response.json();",
+							"        if (responseData && responseData.results.length > 0) {",
+							"            const randomIndex = Math.floor(Math.random() * responseData.results.length);",
+							"            pm.variables.set(\"container_profile\", responseData.results[randomIndex].uri);",
+							"        } else {",
+							"            pm.variables.set(\"container_profile\", \"\");",
+							"        }",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"barcode\": \"{{$randomInt}}\",\n    \"ils_holding_id\": \"{{$randomInt}}\",\n    \"indicator\": \"{{$randomInt}}\",\n    \"internal_note\": \"Internal Note\",\n    \"type\": \"{{container_type}}\",\n    \"jsonmodel_type\": \"top_container\",\n    \"active_restrictions\": [],\n    \"container_locations\": [\n        {\n            \"jsonmodel_type\": \"container_location\",\n            \"status\": \"current\",\n            \"start_date\": \"2025-08-13\",\n            \"end_date\": \"2025-08-15\",\n            \"note\": \"Note\",\n            \"ref\": \"{{location}}\"\n        }\n    ],\n    \"series\": [],\n    \"collection\": [],\n    \"repository\": {\n        \"ref\": \"/repositories/{{REPOSITORY_ID}}\"\n    },\n    \"container_profile\": {\n        \"ref\": \"{{container_profile}}\"\n    },\n    \"restricted\": {{$randomBoolean}}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/repositories/{{REPOSITORY_ID}}/top_containers",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"repositories",
+						"{{REPOSITORY_ID}}",
+						"top_containers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Defined Number of Events",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var currentCount = pm.collectionVariables.get(\"EVENT_COUNT\")",
+							"if (currentCount > 0){",
+							"    currentCount = currentCount -1 ;",
+							"    pm.collectionVariables.set(\"EVENT_COUNT\", currentCount);",
+							"    pm.execution.setNextRequest(\"Create a Defined Number of Events\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Event Types",
+							"var eventTypes = [\"accession\", \"accumulation\", \"acknowledgement_received\", \"acknowledgement_sent\", \"agreement_received\", \"agreement_sent\", \"agreement_signed\", \"appraisal\", \"assessment\", \"capture\", \"cataloged\", \"collection\", \"component_transfer\", \"compression\", \"contribution\", \"copyright_transfer\", \"custody_transfer\", \"deaccession\", \"decompression\", \"decryption\", \"deletion\", \"digital_signature_validation\", \"fixity_check\", \"ingestion\", \"message_digest_calculation\", \"migration\", \"normalization\", \"processed\", \"publication\", \"replication\", \"validation\", \"virus_check\", \"processing_started\", \"processing_completed\", \"processing_in_progress\", \"processing_new\", \"request\"];",
+							"var randomEventType = _.sample(eventTypes);",
+							"",
+							"pm.variables.set(\"EVENT_TYPE\", randomEventType);",
+							"",
+							"const getResources = {",
+							"    url: pm.environment.get(\"ASPACE_BACKEND_URL\") + \"/repositories/\" + pm.collectionVariables.get(\"REPOSITORY_ID\") + \"/resources?page=1\",",
+							"    method: 'GET',",
+							"    header: {",
+							"        'Content-Type': 'application/json',",
+							"        'X-ArchivesSpace-Session': pm.environment.get(\"SESSION\")",
+							"    }",
+							"};",
+							"",
+							"pm.sendRequest(getResources, function (err, response) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        const responseData = response.json();",
+							"        if (responseData && responseData.results.length > 0) {",
+							"            const randomIndex = Math.floor(Math.random() * responseData.results.length);",
+							"            pm.variables.set(\"resource\", responseData.results[randomIndex].uri);",
+							"        } else {",
+							"            pm.variables.set(\"resource\", \"\");",
+							"        }",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"event_type\": \"{{EVENT_TYPE}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"external_ids\": [],\n    \"external_documents\": [],\n    \"linked_agents\": [\n        {\n            \"role\": \"transmitter\",\n            \"ref\": \"/agents/people/1\"\n        },\n        {\n            \"role\": \"recipient\",\n            \"ref\": \"/agents/corporate_entities/1\"\n        }\n    ],\n    \"linked_records\": [\n        {\n            \"role\": \"transfer\",\n            \"ref\": \"{{resource}}\"\n        }\n    ],\n    \"repository\": {\n        \"ref\": \"/repositories/{{REPOSITORY_ID}}\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/repositories/{{REPOSITORY_ID}}/events",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"repositories",
+						"{{REPOSITORY_ID}}",
+						"events"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Defined Number of Assessments",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var currentCount = pm.collectionVariables.get(\"ASSESSMENT_COUNT\")",
+							"if (currentCount > 0){",
+							"    currentCount = currentCount -1 ;",
+							"    pm.collectionVariables.set(\"ASSESSMENT_COUNT\", currentCount);",
+							"    pm.execution.setNextRequest(\"Create a Defined Number of Assessments\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const randomRating = _.sample([\"\", \"1\", \"2\", \"3\", \"4\", \"5\"])",
+							"pm.variables.set(\"RANDOM_RATING\", randomRating)",
+							"",
+							"const getResources = {",
+							"    url: pm.environment.get(\"ASPACE_BACKEND_URL\") + \"/repositories/\" + pm.collectionVariables.get(\"REPOSITORY_ID\") + \"/resources?page=1\",",
+							"    method: 'GET',",
+							"    header: {",
+							"        'Content-Type': 'application/json',",
+							"        'X-ArchivesSpace-Session': pm.environment.get(\"SESSION\")",
+							"    }",
+							"};",
+							"",
+							"pm.sendRequest(getResources, function (err, response) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        const responseData = response.json();",
+							"        if (responseData && responseData.results.length > 0) {",
+							"            const randomIndex = Math.floor(Math.random() * responseData.results.length);",
+							"            pm.variables.set(\"resource\", responseData.results[randomIndex].uri);",
+							"        } else {",
+							"            pm.variables.set(\"resource\", \"\");",
+							"        }",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"accession_report\": {{$randomBoolean}},\n    \"appraisal\": {{$randomBoolean}},\n    \"container_list\": {{$randomBoolean}},\n    \"catalog_record\": {{$randomBoolean}},\n    \"control_file\": {{$randomBoolean}},\n    \"finding_aid_ead\": {{$randomBoolean}},\n    \"finding_aid_paper\": {{$randomBoolean}},\n    \"finding_aid_word\": {{$randomBoolean}},\n    \"finding_aid_spreadsheet\": {{$randomBoolean}},\n    \"surveyed_duration\": \"Time it took to Complete Survey\",\n    \"surveyed_extent\": \"Extent Surveyed\",\n    \"review_required\": {{$randomBoolean}},\n    \"purpose\": \"Purpose of Assessment\",\n    \"scope\": \"Scope of Assessment\",\n    \"sensitive_material\": {{$randomBoolean}},\n    \"general_assessment_note\": \"General Assessment Note\",\n    \"special_format_note\": \"Special Format Note\",\n    \"exhibition_value_note\": \"Exhibition Value Note\",\n    \"deed_of_gift\": {{$randomBoolean}},\n    \"finding_aid_online\": {{$randomBoolean}},\n    \"related_eac_records\": {{$randomBoolean}},\n    \"existing_description_notes\": \"Existing Description Notes\",\n    \"survey_begin\": \"2020-01-07\",\n    \"survey_end\": \"2020-01-07\",\n    \"review_note\": \"Review Note\",\n    \"inactive\": {{$randomBoolean}},\n    \"monetary_value\": \"1\",\n    \"monetary_value_note\": \"Monetary Value Note\",\n    \"conservation_note\": \"Conservation Note\",\n    \"records\": [\n        {\n            \"ref\": \"{{resource}}\"\n        }\n    ],\n    \"surveyed_by\": [\n        {\n            \"ref\": \"/agents/people/1\"\n        }\n    ],\n    \"reviewer\": [\n        {\n            \"ref\": \"/agents/people/1\"\n        }\n    ],\n    \"formats\": [\n        {\n            \"global\": true,\n            \"label\": \"Architectural Materials\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 9\n        },\n        {\n            \"global\": true,\n            \"label\": \"Art Originals\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 10\n        },\n        {\n            \"global\": true,\n            \"label\": \"Artifacts\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 11\n        },\n        {\n            \"global\": true,\n            \"label\": \"Audio Materials\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 12\n        },\n        {\n            \"global\": true,\n            \"label\": \"Biological Specimens\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 13\n        },\n        {\n            \"global\": true,\n            \"label\": \"Botanical Specimens\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 14\n        },\n        {\n            \"global\": true,\n            \"label\": \"Computer Storage Units\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 15\n        },\n        {\n            \"global\": true,\n            \"label\": \"Film (negative, slide, or motion picture)\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 16\n        },\n        {\n            \"global\": true,\n            \"label\": \"Glass\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 17\n        },\n        {\n            \"global\": true,\n            \"label\": \"Photographs\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 18\n        },\n        {\n            \"global\": true,\n            \"label\": \"Scrapbooks\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 19\n        },\n        {\n            \"global\": true,\n            \"label\": \"Technical Drawings & Schematics\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 20\n        },\n        {\n            \"global\": true,\n            \"label\": \"Textiles\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 21\n        },\n        {\n            \"global\": true,\n            \"label\": \"Vellum & Parchment\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 22\n        },\n        {\n            \"global\": true,\n            \"label\": \"Video Materials\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 23\n        },\n        {\n            \"global\": true,\n            \"label\": \"Other\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 24\n        }\n    ],\n    \"conservation_issues\": [\n        {\n            \"global\": true,\n            \"label\": \"Potential Mold or Mold Damage\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 25\n        },\n        {\n            \"global\": true,\n            \"label\": \"Recent Pest Damage\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 26\n        },\n        {\n            \"global\": true,\n            \"label\": \"Deteriorating Film Base\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 27\n        },\n        {\n            \"global\": true,\n            \"label\": \"Brittle Paper\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 28\n        },\n        {\n            \"global\": true,\n            \"label\": \"Metal Fasteners\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 29\n        },\n        {\n            \"global\": true,\n            \"label\": \"Newspaper\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 30\n        },\n        {\n            \"global\": true,\n            \"label\": \"Tape\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 31\n        },\n        {\n            \"global\": true,\n            \"label\": \"Heat-Sensitive Paper\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 32\n        },\n        {\n            \"global\": true,\n            \"label\": \"Water Damage\",\n            \"value\": \"{{$randomBoolean}}\",\n            \"readonly\": false,\n            \"definition_id\": 33\n        }\n    ],\n    \"ratings\": [\n        {\n            \"global\": true,\n            \"label\": \"Reformatting Readiness\",\n            \"value\": \"{{RANDOM_RATING}}\",\n            \"readonly\": false,\n            \"definition_id\": 1\n        },\n        {\n            \"global\": true,\n            \"label\": \"Housing Quality\",\n            \"value\": \"{{RANDOM_RATING}}\",\n            \"readonly\": false,\n            \"definition_id\": 2\n        },\n        {\n            \"global\": true,\n            \"label\": \"Physical Condition\",\n            \"value\": \"{{RANDOM_RATING}}\",\n            \"readonly\": false,\n            \"definition_id\": 3\n        },\n        {\n            \"global\": true,\n            \"label\": \"Physical Access (arrangement)\",\n            \"value\": \"{{RANDOM_RATING}}\",\n            \"readonly\": false,\n            \"definition_id\": 4\n        },\n        {\n            \"global\": true,\n            \"label\": \"Intellectual Access (description)\",\n            \"value\": \"{{RANDOM_RATING}}\",\n            \"readonly\": false,\n            \"definition_id\": 5\n        },\n        {\n            \"global\": true,\n            \"label\": \"Interest\",\n            \"value\": \"{{RANDOM_RATING}}\",\n            \"readonly\": false,\n            \"definition_id\": 6\n        },\n        {\n            \"global\": true,\n            \"label\": \"Documentation Quality\",\n            \"value\": \"{{RANDOM_RATING}}\",\n            \"readonly\": false,\n            \"definition_id\": 7\n        },\n        {\n            \"global\": true,\n            \"label\": \"Research Value\",\n            \"value\": \"{{RANDOM_RATING}}\",\n            \"readonly\": true,\n            \"definition_id\": 8\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/repositories/{{REPOSITORY_ID}}/assessments",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"repositories",
+						"{{REPOSITORY_ID}}",
+						"assessments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Subjects for Every Term Type",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var currentTerms = pm.collectionVariables.get(\"SUBJECT_TERMS\")",
+							"console.log(currentTerms)",
+							"if (currentTerms != \"[]\") {",
+							"    pm.execution.setNextRequest(\"Create Subjects for Every Term Type\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Subject sources",
+							"var subjSources = [\"aat\", \"gmgpc\", \"lcsh\", \"local\", \"mesh\", \"rbgenr\", \"tgn\", \"ingest\"];",
+							"var randomSource = _.sample(subjSources);",
+							"",
+							"// Set the selected item as an collection variable",
+							"pm.collectionVariables.set(\"SUBJECT_SOURCE\", randomSource);",
+							"",
+							"var currentTerms = JSON.parse(pm.collectionVariables.get(\"SUBJECT_TERMS\"))",
+							"if (currentTerms != \"[]\") {",
+							"    term = currentTerms.pop()",
+							"    pm.collectionVariables.set(\"SUBJECT_TERM\", term);",
+							"    pm.collectionVariables.set(\"SUBJECT_TERMS\", JSON.stringify(currentTerms));",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"authority_id\": \"AuthID{{$randomInt}}\",\n    \"scope_note\": \"Scope Note\",\n    \"source\": \"{{SUBJECT_SOURCE}}\",\n    \"jsonmodel_type\": \"subject\",\n    \"publish\": true,\n    \"terms\": [\n        {\n            \"term\": \"{{SUBJECT_TERM}} Term 1\",\n            \"term_type\": \"{{SUBJECT_TERM}}\",\n            \"jsonmodel_type\": \"term\",\n            \"vocabulary\": \"/vocabularies/1\"\n        },\n        {\n            \"term\": \"{{SUBJECT_TERM}} Term 2\",\n            \"term_type\": \"{{SUBJECT_TERM}}\",\n            \"jsonmodel_type\": \"term\",\n            \"vocabulary\": \"/vocabularies/1\"\n        }\n    ],\n    \"external_documents\": [\n        {\n            \"title\": \"External Document Title\",\n            \"location\": \"External Document Location\",\n            \"publish\": true,\n            \"jsonmodel_type\": \"external_document\"\n        }\n    ],\n    \"metadata_rights_declarations\": [\n        {\n            \"descriptive_note\": \"Descriptive Note 1\",\n            \"file_uri\": \"https://creativecommons.org/licenses/by/4.0/\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"license\": \"share_a_like\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"metadata_rights_declaration\"\n        },\n\n        {\n            \"descriptive_note\": \"Descriptive Note 2\",\n            \"file_uri\": \"https://creativecommons.org/licenses/by/4.0/\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"license\": \"public_domain\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"metadata_rights_declaration\"\n        }\n    ],\n    \"vocabulary\": \"/vocabularies/1\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/subjects",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"subjects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Subjects and Assign to Env Vars",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Find representative subjects of each kind",
+							"_.each(pm.response.json()['results'], (item) => {",
+							"    if(item.title.includes(\"cultural_context\")) {",
+							"        pm.collectionVariables.set(\"CULT_SUBJ\", item['uri']);",
+							"    } else if(item.title.includes(\"function\")) {",
+							"        pm.collectionVariables.set(\"FUNC_SUBJ\", item['uri']);",
+							"    } else if(item.title.includes(\"genre_form\")) {",
+							"        pm.collectionVariables.set(\"GENRE_SUBJ\", item['uri']);",
+							"    } else if(item.title.includes(\"geographic\")) {",
+							"        pm.collectionVariables.set(\"GEOG_SUBJ\", item['uri']);",
+							"    } else if(item.title.includes(\"occupation\")) {",
+							"        pm.collectionVariables.set(\"OCC_SUBJ\", item['uri']);",
+							"    } else if(item.title.includes(\"style_period\")) {",
+							"        pm.collectionVariables.set(\"STYLE_SUBJ\", item['uri']);",
+							"    } else if(item.title.includes(\"technique\")) {",
+							"        pm.collectionVariables.set(\"TECH_SUBJ\", item['uri']);",
+							"    } else if(item.title.includes(\"temporal\")) {",
+							"        pm.collectionVariables.set(\"TEMP_SUBJ\", item['uri']);",
+							"    } else if(item.title.includes(\"topical\")) {",
+							"        pm.collectionVariables.set(\"TOP_SUBJ\", item['uri']);",
+							"    } else if(item.title.includes(\"uniform_title\")) {",
+							"        pm.collectionVariables.set(\"TITLE_SUBJ\", item['uri']);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/subjects?page=1&page_size=50",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"subjects"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "page_size",
+							"value": "50"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Full Person Agent",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"publish\": true,\n    \"jsonmodel_type\": \"agent_person\",\n    \"agent_contacts\": [\n        {\n            \"name\": \"Contact Name\",\n            \"address_1\": \"Address 1\",\n            \"address_2\": \"Address 2\",\n            \"address_3\": \"Address 3\",\n            \"city\": \"City\",\n            \"region\": \"State\",\n            \"country\": \"Country\",\n            \"post_code\": \"PostCode\",\n            \"email\": \"Email\",\n            \"salutation\": \"sir\",\n            \"jsonmodel_type\": \"agent_contact\",\n            \"telephones\": [\n                {\n                    \"number\": \"555-555-5555\",\n                    \"ext\": \"555\",\n                    \"number_type\": \"business\",\n                    \"jsonmodel_type\": \"telephone\",\n                    \"uri\": \"/telephone/2\"\n                }\n            ],\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_contact_note\",\n                    \"persistent_id\": \"ContactPersID1\",\n                    \"date_of_contact\": \"Date of Contact\",\n                    \"contact_notes\": \"Contact Note 1\",\n                    \"publish\": false\n                },\n                {\n                    \"jsonmodel_type\": \"note_contact_note\",\n                    \"persistent_id\": \"ContactPersID2\",\n                    \"date_of_contact\": \"Date of Contact\",\n                    \"contact_notes\": \"Contact Note 2\",\n                    \"publish\": false\n                }\n            ],\n            \"is_representative\": false\n        }\n    ],\n    \"agent_record_controls\": [\n        {\n            \"maintenance_agency\": \"DLC\",\n            \"agency_name\": \"Agency Name\",\n            \"maintenance_agency_note\": \"Maintenance Agency Note\",\n            \"language_note\": \"Language Note\",\n            \"maintenance_status\": \"revised_corrected\",\n            \"publication_status\": \"approved\",\n            \"romanization\": \"int_std\",\n            \"government_agency_type\": \"unknown\",\n            \"reference_evaluation\": \"tr_inconsistent\",\n            \"name_type\": \"differentiated\",\n            \"level_of_detail\": \"fully_established\",\n            \"modified_record\": \"not_modified\",\n            \"cataloging_source\": \"nat_bib_agency\",\n            \"language\": \"eng\",\n            \"script\": \"Latn\",\n            \"jsonmodel_type\": \"agent_record_control\"\n        }\n    ],\n    \"agent_alternate_sets\": [\n        {\n            \"set_component\": \"Set Component 1\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Role Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"replace\",\n            \"jsonmodel_type\": \"agent_alternate_set\"\n        },\n        {\n            \"set_component\": \"Set Component 2\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"file_version_xlink_actuate_attribute\": \"onLoad\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_alternate_set\"\n        }\n    ],\n    \"agent_conventions_declarations\": [\n        {\n            \"citation\": \"Citation 1\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"name_rule\": \"rda\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_conventions_declaration\"\n        },\n        {\n            \"citation\": \"Citation 2\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"name_rule\": \"aacr\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_conventions_declaration\"\n        }\n    ],\n    \"agent_other_agency_codes\": [\n        {\n            \"maintenance_agency\": \"Maintenance Agency 1\",\n            \"jsonmodel_type\": \"agent_other_agency_codes\"\n        },\n        {\n            \"maintenance_agency\": \"Maintenance Agency 2\",\n            \"agency_code_type\": \"oclc\",\n            \"jsonmodel_type\": \"agent_other_agency_codes\"\n        }\n    ],\n    \"agent_maintenance_histories\": [\n        {\n            \"event_date\": \"2025-07-18 00:00:00 UTC\",\n            \"agent\": \"Agent\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"maintenance_event_type\": \"created\",\n            \"maintenance_agent_type\": \"human\",\n            \"jsonmodel_type\": \"agent_maintenance_history\"\n        },\n        {\n            \"event_date\": \"2025-07-18 00:00:00 UTC\",\n            \"agent\": \"Agent\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"maintenance_event_type\": \"cancelled\",\n            \"maintenance_agent_type\": \"machine\",\n            \"jsonmodel_type\": \"agent_maintenance_history\"\n        }\n    ],\n    \"agent_record_identifiers\": [\n        {\n            \"primary_identifier\": true,\n            \"record_identifier\": \"n  12345\",\n            \"source\": \"naf\",\n            \"identifier_type\": \"loc\",\n            \"jsonmodel_type\": \"agent_record_identifier\"\n        },\n        {\n            \"primary_identifier\": false,\n            \"record_identifier\": \"l 12345\",\n            \"source\": \"local\",\n            \"identifier_type\": \"other_unmapped\",\n            \"jsonmodel_type\": \"agent_record_identifier\"\n        }\n    ],\n    \"agent_identifiers\": [\n        {\n            \"entity_identifier\": \"Entity IDs 1\",\n            \"identifier_type\": \"loc\",\n            \"jsonmodel_type\": \"agent_identifier\"\n        },\n        {\n            \"entity_identifier\": \"Entity IDs 2\",\n            \"identifier_type\": \"lac\",\n            \"jsonmodel_type\": \"agent_identifier\"\n        }\n    ],\n    \"agent_sources\": [\n        {\n            \"source_entry\": \"Source Entry 1\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"file_version_xlink_actuate_attribute\": \"onRequest\",\n            \"file_version_xlink_show_attribute\": \"none\",\n            \"jsonmodel_type\": \"agent_sources\"\n        },\n        {\n            \"source_entry\": \"Source Entry 2\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"file_version_xlink_actuate_attribute\": \"other\",\n            \"file_version_xlink_show_attribute\": \"other\",\n            \"jsonmodel_type\": \"agent_sources\"\n        }\n    ],\n    \"agent_places\": [\n        {\n            \"publish\": true,\n            \"place_role\": \"assoc_country\",\n            \"jsonmodel_type\": \"agent_place\",\n            \"dates\": [\n                {\n                    \"date_type_structured\": \"single\",\n                    \"date_label\": \"usage\",\n                    \"date_certainty\": \"questionable\",\n                    \"date_era\": \"ce\",\n                    \"date_calendar\": \"gregorian\",\n                    \"jsonmodel_type\": \"structured_date_label\",\n                    \"structured_date_single\": {\n                        \"date_expression\": \"1800\",\n                        \"date_standardized\": \"1800\",\n                        \"date_role\": \"begin\",\n                        \"date_standardized_type\": \"standard\",\n                        \"jsonmodel_type\": \"structured_date_single\"\n                    }\n                }\n            ],\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_citation\",\n                    \"persistent_id\": \"CitationPersistentID1\",\n                    \"content\": [\n                        \"Content 1\"\n                    ],\n                    \"xlink\": {\n                        \"actuate\": \"Actuate\",\n                        \"arcrole\": \"Arc Role\",\n                        \"href\": \"Href\",\n                        \"role\": \"Role\",\n                        \"show\": \"Show\",\n                        \"title\": \"Title\",\n                        \"type\": \"Type\"\n                    },\n                    \"publish\": true\n                },\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Content 1\",\n                    \"publish\": true\n                }\n            ],\n            \"subjects\": [\n                {\n                    \"ref\": \"{{GEOG_SUBJ}}\"\n                }\n            ]\n        }\n    ],\n    \"agent_occupations\": [\n        {\n            \"publish\": true,\n            \"jsonmodel_type\": \"agent_occupation\",\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Text content\",\n                    \"publish\": true\n                }\n            ],\n            \"dates\": [],\n            \"subjects\": [\n                {\n                    \"ref\": \"{{OCC_SUBJ}}\"\n                }\n            ],\n            \"places\": [\n                {\n                    \"ref\": \"{{GEOG_SUBJ}}\"\n                }\n            ]\n        }\n    ],\n    \"agent_functions\": [\n        {\n            \"publish\": true,\n            \"jsonmodel_type\": \"agent_function\",\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Content 1\",\n                    \"publish\": true\n                }\n            ],\n            \"dates\": [\n                {\n                    \"date_type_structured\": \"single\",\n                    \"date_label\": \"usage\",\n                    \"date_certainty\": \"approximate\",\n                    \"date_era\": \"ce\",\n                    \"date_calendar\": \"gregorian\",\n                    \"jsonmodel_type\": \"structured_date_label\",\n                    \"structured_date_single\": {\n                        \"date_expression\": \"1800\",\n                        \"date_standardized\": \"1800\",\n                        \"date_role\": \"begin\",\n                        \"date_standardized_type\": \"standard\",\n                        \"jsonmodel_type\": \"structured_date_single\"\n                    }\n                }\n            ],\n            \"subjects\": [\n                {\n                    \"ref\": \"{{FUNC_SUBJ}}\"\n                }\n            ],\n            \"places\": [\n                {\n                    \"ref\": \"{{GEOG_SUBJ}}\"\n                }\n            ]\n        }\n    ],\n    \"agent_topics\": [\n        {\n            \"publish\": true,\n            \"jsonmodel_type\": \"agent_topic\",\n            \"dates\": [],\n            \"notes\": [],\n            \"subjects\": [\n                {\n                    \"ref\": \"{{TOP_SUBJ}}\"\n                }\n            ],\n            \"places\": []\n        }\n    ],\n    \"agent_resources\": [\n        {\n            \"linked_resource\": \"Related External Resource 1\",\n            \"linked_resource_description\": \"Description\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"publish\": true,\n            \"linked_agent_role\": \"creator\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_resource\",\n            \"dates\": [\n                {\n                    \"date_type_structured\": \"single\",\n                    \"date_label\": \"usage\",\n                    \"date_certainty\": \"approximate\",\n                    \"date_era\": \"ce\",\n                    \"date_calendar\": \"gregorian\",\n                    \"jsonmodel_type\": \"structured_date_label\",\n                    \"structured_date_single\": {\n                        \"date_expression\": \"1800\",\n                        \"date_standardized\": \"1900\",\n                        \"date_role\": \"begin\",\n                        \"date_standardized_type\": \"standard\",\n                        \"jsonmodel_type\": \"structured_date_single\"\n                    }\n                }\n            ],\n            \"places\": [\n                {\n                    \"ref\": \"{{GEOG_SUBJ}}\"\n                }\n            ]\n        },\n        {\n            \"linked_resource\": \"Related External Resource 2\",\n            \"linked_resource_description\": \"Description\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"publish\": true,\n            \"linked_agent_role\": \"source\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_resource\",\n            \"dates\": [],\n            \"places\": []\n        }\n    ],\n    \"linked_agent_roles\": [],\n    \"external_documents\": [\n        {\n            \"title\": \"External Document Title 1\",\n            \"location\": \"Location 1\",\n            \"publish\": true,\n            \"jsonmodel_type\": \"external_document\"\n        },\n        {\n            \"title\": \"External Document Title 2\",\n            \"location\": \"Location 2\",\n            \"publish\": true,\n            \"jsonmodel_type\": \"external_document\"\n        }\n    ],\n    \"notes\": [\n        {\n            \"jsonmodel_type\": \"note_bioghist\",\n            \"persistent_id\": \"BiogHistPersistentID1\",\n            \"label\": \"Biographical note\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_abstract\",\n                    \"persistent_id\": \"SubPersistentID1\",\n                    \"publish\": true,\n                    \"content\": [\n                        \"Abstract 1 Content 1.\",\n                        \"Abstract 1 Content 2.\"\n                    ]\n                }\n            ],\n            \"publish\": true\n        },\n        {\n            \"jsonmodel_type\": \"note_general_context\",\n            \"persistent_id\": \"GeneralPersistentID1\",\n            \"label\": \"General Context 1\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Content 1.\",\n                    \"publish\": false\n                },\n                {\n                    \"jsonmodel_type\": \"note_definedlist\",\n                    \"title\": \"Defined List\",\n                    \"publish\": true,\n                    \"items\": [\n                        {\n                            \"label\": \"Item\",\n                            \"value\": \"1\"\n                        },\n                        {\n                            \"label\": \"Item\",\n                            \"value\": \"2\"\n                        }\n                    ]\n                },\n                {\n                    \"jsonmodel_type\": \"note_outline\",\n                    \"publish\": true,\n                    \"levels\": [\n                        {\n                            \"jsonmodel_type\": \"note_outline_level\",\n                            \"items\": [\n                                {\n                                    \"jsonmodel_type\": \"note_outline_level\",\n                                    \"items\": [\n                                        \"Item 1\",\n                                        \"Item 2\",\n                                        {\n                                            \"jsonmodel_type\": \"note_outline_level\",\n                                            \"items\": [\n                                                \"Item 3\"\n                                            ]\n                                        }\n                                    ]\n                                }\n                            ]\n                        }\n                    ]\n                }\n            ],\n            \"publish\": true\n        }\n    ],\n    \"used_within_repositories\": [],\n    \"used_within_published_repositories\": [],\n    \"dates_of_existence\": [\n        {\n            \"date_type_structured\": \"range\",\n            \"date_label\": \"existence\",\n            \"date_certainty\": \"approximate\",\n            \"date_era\": \"ce\",\n            \"date_calendar\": \"gregorian\",\n            \"jsonmodel_type\": \"structured_date_label\",\n            \"structured_date_range\": {\n                \"begin_date_expression\": \"1800\",\n                \"begin_date_standardized\": \"1800-01-01\",\n                \"end_date_expression\": \"1900\",\n                \"end_date_standardized\": \"1900-12-31\",\n                \"begin_date_standardized_type\": \"standard\",\n                \"end_date_standardized_type\": \"standard\",\n                \"jsonmodel_type\": \"structured_date_range\"\n            }\n        },\n        {\n            \"date_type_structured\": \"single\",\n            \"date_label\": \"existence\",\n            \"date_certainty\": \"inferred\",\n            \"date_era\": \"ce\",\n            \"date_calendar\": \"gregorian\",\n            \"jsonmodel_type\": \"structured_date_label\",\n            \"structured_date_single\": {\n                \"date_expression\": \"1800\",\n                \"date_standardized\": \"1800\",\n                \"date_role\": \"begin\",\n                \"date_standardized_type\": \"not_before\",\n                \"jsonmodel_type\": \"structured_date_single\"\n            }\n        }\n    ],\n    \"used_languages\": [\n        {\n            \"language\": \"eng\",\n            \"script\": \"Latn\",\n            \"jsonmodel_type\": \"used_language\",\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Content 1\",\n                    \"publish\": true\n                }\n            ]\n        }\n    ],\n    \"metadata_rights_declarations\": [\n        {\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"license\": \"public_domain\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"metadata_rights_declaration\"\n        },\n        {\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"license\": \"non_commercial_no_derivatives\",\n            \"file_version_xlink_actuate_attribute\": \"onLoad\",\n            \"file_version_xlink_show_attribute\": \"new\",\n            \"jsonmodel_type\": \"metadata_rights_declaration\"\n        }\n    ],\n    \"names\": [\n        {\n            \"primary_name\": \"Primary 1\",\n            \"title\": \"Title\",\n            \"prefix\": \"Prefix\",\n            \"rest_of_name\": \"Rest 1\",\n            \"suffix\": \"Suffix\",\n            \"fuller_form\": \"Fuller Form\",\n            \"number\": \"Number\",\n            \"dates\": \"1800-1900\",\n            \"qualifier\": \"Qualifier 1\",\n            \"sort_name_auto_generate\": true,\n            \"authorized\": true,\n            \"is_display_name\": true,\n            \"source\": \"local\",\n            \"rules\": \"aacr\",\n            \"language\": \"eng\",\n            \"script\": \"Latn\",\n            \"transliteration\": \"ala-lc\",\n            \"name_order\": \"inverted\",\n            \"jsonmodel_type\": \"name_person\",\n            \"use_dates\": [\n                {\n                    \"date_type_structured\": \"range\",\n                    \"date_label\": \"usage\",\n                    \"date_certainty\": \"approximate\",\n                    \"date_era\": \"ce\",\n                    \"date_calendar\": \"gregorian\",\n                    \"jsonmodel_type\": \"structured_date_label\",\n                    \"structured_date_range\": {\n                        \"begin_date_expression\": \"1800\",\n                        \"begin_date_standardized\": \"1800\",\n                        \"end_date_expression\": \"1900\",\n                        \"end_date_standardized\": \"1900\",\n                        \"begin_date_standardized_type\": \"standard\",\n                        \"end_date_standardized_type\": \"standard\",\n                        \"jsonmodel_type\": \"structured_date_range\"\n                    }\n                }\n            ],\n            \"parallel_names\": [\n                {\n                    \"primary_name\": \"Parallel Primary 1\",\n                    \"title\": \"Parallel Title\",\n                    \"prefix\": \"Parallel Prefix\",\n                    \"rest_of_name\": \"Parallel Rest 1\",\n                    \"suffix\": \"Parallel Suffix\",\n                    \"fuller_form\": \"Parallel Fuller\",\n                    \"number\": \"Parallel Number\",\n                    \"dates\": \"Parallel Dates\",\n                    \"qualifier\": \"Parallel Qualifier\",\n                    \"sort_name_auto_generate\": true,\n                    \"language\": \"eng\",\n                    \"script\": \"Latn\",\n                    \"transliteration\": \"ala-lc\",\n                    \"name_order\": \"inverted\",\n                    \"jsonmodel_type\": \"parallel_name_person\",\n                    \"use_dates\": [\n                        {\n                            \"date_type_structured\": \"single\",\n                            \"date_label\": \"usage\",\n                            \"date_certainty\": \"questionable\",\n                            \"date_era\": \"ce\",\n                            \"date_calendar\": \"gregorian\",\n                            \"jsonmodel_type\": \"structured_date_label\",\n                            \"structured_date_single\": {\n                                \"date_expression\": \"1900\",\n                                \"date_standardized\": \"1900\",\n                                \"date_role\": \"begin\",\n                                \"date_standardized_type\": \"standard\",\n                                \"jsonmodel_type\": \"structured_date_single\"\n                            }\n                        }\n                    ]\n                }\n            ],\n            \"authority_id\": \"{{$randomInt}}\"\n        },\n        {\n            \"primary_name\": \"Primary 2\",\n            \"title\": \"Title\",\n            \"prefix\": \"Prefix\",\n            \"rest_of_name\": \"Rest 2\",\n            \"suffix\": \"Suffix\",\n            \"fuller_form\": \"Fuller\",\n            \"number\": \"Number\",\n            \"dates\": \"Dates\",\n            \"qualifier\": \"Qualifier\",\n            \"sort_name_auto_generate\": true,\n            \"source\": \"naf\",\n            \"rules\": \"dacs\",\n            \"language\": \"ger\",\n            \"script\": \"Latf\",\n            \"name_order\": \"direct\",\n            \"jsonmodel_type\": \"name_person\",\n            \"use_dates\": [],\n            \"authorized\": false,\n            \"is_display_name\": false,\n            \"parallel_names\": [],\n            \"authority_id\": \"{{$randomInt}}\"\n        }\n    ],\n    \"agent_genders\": [],\n    \"related_agents\": [\n        {\n            \"jsonmodel_type\": \"agent_relationship_associative\",\n            \"description\": \"Description\",\n            \"relationship_uri\": \"Relationship URI\",\n            \"relator\": \"is_associative_with\",\n            \"dates\": {\n                \"date_type_structured\": \"range\",\n                \"date_label\": \"usage\",\n                \"date_certainty\": \"approximate\",\n                \"date_era\": \"ce\",\n                \"date_calendar\": \"gregorian\",\n                \"jsonmodel_type\": \"structured_date_label\",\n                \"structured_date_range\": {\n                    \"begin_date_expression\": \"1800\",\n                    \"begin_date_standardized\": \"1800\",\n                    \"end_date_expression\": \"1900\",\n                    \"end_date_standardized\": \"1900\",\n                    \"begin_date_standardized_type\": \"standard\",\n                    \"end_date_standardized_type\": \"standard\",\n                    \"jsonmodel_type\": \"structured_date_range\"\n                }\n            },\n            \"ref\": \"/agents/people/1\"\n        },\n        {\n            \"jsonmodel_type\": \"agent_relationship_parentchild\",\n            \"description\": \"Description\",\n            \"relationship_uri\": \"Relationship URI\",\n            \"relator\": \"is_child_of\",\n            \"ref\": \"/agents/people/1\"\n        }\n    ],\n    \"agent_type\": \"agent_person\",\n    \"is_linked_to_published_record\": false,\n    \"display_name\": {\n        \"primary_name\": \"Primary 1\",\n        \"title\": \"Title\",\n        \"prefix\": \"Prefix\",\n        \"rest_of_name\": \"Rest 1\",\n        \"suffix\": \"Suffix\",\n        \"fuller_form\": \"Fuller Form\",\n        \"number\": \"Number\",\n        \"dates\": \"1800-1900\",\n        \"qualifier\": \"Qualifier 1\",\n        \"sort_name_auto_generate\": true,\n        \"authorized\": true,\n        \"is_display_name\": true,\n        \"source\": \"local\",\n        \"rules\": \"aacr\",\n        \"language\": \"eng\",\n        \"script\": \"Latn\",\n        \"transliteration\": \"ala-lc\",\n        \"name_order\": \"inverted\",\n        \"jsonmodel_type\": \"name_person\",\n        \"use_dates\": [\n            {\n                \"date_type_structured\": \"range\",\n                \"date_label\": \"usage\",\n                \"date_certainty\": \"approximate\",\n                \"date_era\": \"ce\",\n                \"date_calendar\": \"gregorian\",\n                \"jsonmodel_type\": \"structured_date_label\",\n                \"structured_date_range\": {\n                    \"begin_date_expression\": \"1800\",\n                    \"begin_date_standardized\": \"1800\",\n                    \"end_date_expression\": \"1900\",\n                    \"end_date_standardized\": \"1900\",\n                    \"begin_date_standardized_type\": \"standard\",\n                    \"end_date_standardized_type\": \"standard\",\n                    \"jsonmodel_type\": \"structured_date_range\"\n                }\n            }\n        ],\n        \"parallel_names\": [\n            {\n                \"primary_name\": \"Parallel Primary 1\",\n                \"title\": \"Parallel Title\",\n                \"prefix\": \"Parallel Prefix\",\n                \"rest_of_name\": \"Parallel Rest 1\",\n                \"suffix\": \"Parallel Suffix\",\n                \"fuller_form\": \"Parallel Fuller\",\n                \"number\": \"Parallel Number\",\n                \"dates\": \"Parallel Dates\",\n                \"qualifier\": \"Parallel Qualifier\",\n                \"sort_name_auto_generate\": true,\n                \"language\": \"eng\",\n                \"script\": \"Latn\",\n                \"transliteration\": \"ala-lc\",\n                \"name_order\": \"inverted\",\n                \"jsonmodel_type\": \"parallel_name_person\",\n                \"use_dates\": [\n                    {\n                        \"date_type_structured\": \"single\",\n                        \"date_label\": \"usage\",\n                        \"date_certainty\": \"questionable\",\n                        \"date_era\": \"ce\",\n                        \"date_calendar\": \"gregorian\",\n                        \"jsonmodel_type\": \"structured_date_label\",\n                        \"structured_date_single\": {\n                            \"date_expression\": \"1900\",\n                            \"date_standardized\": \"1900\",\n                            \"date_role\": \"begin\",\n                            \"date_standardized_type\": \"standard\",\n                            \"jsonmodel_type\": \"structured_date_single\"\n                        }\n                    }\n                ]\n            }\n        ],\n        \"authority_id\": \"{{$randomInt}}\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/agents/people",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"agents",
+						"people"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Full Corporate Agent",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"publish\": true,\n    \"jsonmodel_type\": \"agent_corporate_entity\",\n    \"agent_contacts\": [\n        {\n            \"name\": \"Contact Name\",\n            \"address_1\": \"Address 1\",\n            \"address_2\": \"Address 2\",\n            \"address_3\": \"Address 3\",\n            \"city\": \"City\",\n            \"region\": \"State\",\n            \"country\": \"Country\",\n            \"post_code\": \"PostCode\",\n            \"email\": \"Email\",\n            \"salutation\": \"sir\",\n            \"jsonmodel_type\": \"agent_contact\",\n            \"telephones\": [\n                {\n                    \"number\": \"555-555-5555\",\n                    \"ext\": \"555\",\n                    \"number_type\": \"business\",\n                    \"jsonmodel_type\": \"telephone\",\n                    \"uri\": \"/telephone/2\"\n                }\n            ],\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_contact_note\",\n                    \"persistent_id\": \"ContactPersID1\",\n                    \"date_of_contact\": \"Date of Contact\",\n                    \"contact_notes\": \"Contact Note 1\",\n                    \"publish\": false\n                },\n                {\n                    \"jsonmodel_type\": \"note_contact_note\",\n                    \"persistent_id\": \"ContactPersID2\",\n                    \"date_of_contact\": \"Date of Contact\",\n                    \"contact_notes\": \"Contact Note 2\",\n                    \"publish\": false\n                }\n            ],\n            \"is_representative\": false\n        }\n    ],\n    \"agent_record_controls\": [\n        {\n            \"maintenance_agency\": \"DLC\",\n            \"agency_name\": \"Agency Name\",\n            \"maintenance_agency_note\": \"Maintenance Agency Note\",\n            \"language_note\": \"Language Note\",\n            \"maintenance_status\": \"revised_corrected\",\n            \"publication_status\": \"approved\",\n            \"romanization\": \"int_std\",\n            \"government_agency_type\": \"unknown\",\n            \"reference_evaluation\": \"tr_inconsistent\",\n            \"name_type\": \"differentiated\",\n            \"level_of_detail\": \"fully_established\",\n            \"modified_record\": \"not_modified\",\n            \"cataloging_source\": \"nat_bib_agency\",\n            \"language\": \"eng\",\n            \"script\": \"Latn\",\n            \"jsonmodel_type\": \"agent_record_control\"\n        }\n    ],\n    \"agent_alternate_sets\": [\n        {\n            \"set_component\": \"Set Component 1\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Role Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"replace\",\n            \"jsonmodel_type\": \"agent_alternate_set\"\n        },\n        {\n            \"set_component\": \"Set Component 2\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"file_version_xlink_actuate_attribute\": \"onLoad\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_alternate_set\"\n        }\n    ],\n    \"agent_conventions_declarations\": [\n        {\n            \"citation\": \"Citation 1\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"name_rule\": \"rda\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_conventions_declaration\"\n        },\n        {\n            \"citation\": \"Citation 2\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"name_rule\": \"aacr\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_conventions_declaration\"\n        }\n    ],\n    \"agent_other_agency_codes\": [\n        {\n            \"maintenance_agency\": \"Maintenance Agency 1\",\n            \"jsonmodel_type\": \"agent_other_agency_codes\"\n        },\n        {\n            \"maintenance_agency\": \"Maintenance Agency 2\",\n            \"agency_code_type\": \"oclc\",\n            \"jsonmodel_type\": \"agent_other_agency_codes\"\n        }\n    ],\n    \"agent_maintenance_histories\": [\n        {\n            \"event_date\": \"2025-07-18 00:00:00 UTC\",\n            \"agent\": \"Agent\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"maintenance_event_type\": \"created\",\n            \"maintenance_agent_type\": \"human\",\n            \"jsonmodel_type\": \"agent_maintenance_history\"\n        },\n        {\n            \"event_date\": \"2025-07-18 00:00:00 UTC\",\n            \"agent\": \"Agent\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"maintenance_event_type\": \"cancelled\",\n            \"maintenance_agent_type\": \"machine\",\n            \"jsonmodel_type\": \"agent_maintenance_history\"\n        }\n    ],\n    \"agent_record_identifiers\": [\n        {\n            \"primary_identifier\": true,\n            \"record_identifier\": \"n  6789\",\n            \"source\": \"naf\",\n            \"identifier_type\": \"loc\",\n            \"jsonmodel_type\": \"agent_record_identifier\"\n        },\n        {\n            \"primary_identifier\": false,\n            \"record_identifier\": \"l 6789\",\n            \"source\": \"local\",\n            \"identifier_type\": \"other_unmapped\",\n            \"jsonmodel_type\": \"agent_record_identifier\"\n        }\n    ],\n    \"agent_identifiers\": [\n        {\n            \"entity_identifier\": \"Entity IDs 1\",\n            \"identifier_type\": \"loc\",\n            \"jsonmodel_type\": \"agent_identifier\"\n        },\n        {\n            \"entity_identifier\": \"Entity IDs 2\",\n            \"identifier_type\": \"lac\",\n            \"jsonmodel_type\": \"agent_identifier\"\n        }\n    ],\n    \"agent_sources\": [\n        {\n            \"source_entry\": \"Source Entry 1\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"file_version_xlink_actuate_attribute\": \"onRequest\",\n            \"file_version_xlink_show_attribute\": \"none\",\n            \"jsonmodel_type\": \"agent_sources\"\n        },\n        {\n            \"source_entry\": \"Source Entry 2\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"file_version_xlink_actuate_attribute\": \"other\",\n            \"file_version_xlink_show_attribute\": \"other\",\n            \"jsonmodel_type\": \"agent_sources\"\n        }\n    ],\n    \"agent_places\": [\n        {\n            \"publish\": true,\n            \"place_role\": \"assoc_country\",\n            \"jsonmodel_type\": \"agent_place\",\n            \"dates\": [\n                {\n                    \"date_type_structured\": \"single\",\n                    \"date_label\": \"usage\",\n                    \"date_certainty\": \"questionable\",\n                    \"date_era\": \"ce\",\n                    \"date_calendar\": \"gregorian\",\n                    \"jsonmodel_type\": \"structured_date_label\",\n                    \"structured_date_single\": {\n                        \"date_expression\": \"1800\",\n                        \"date_standardized\": \"1800\",\n                        \"date_role\": \"begin\",\n                        \"date_standardized_type\": \"standard\",\n                        \"jsonmodel_type\": \"structured_date_single\"\n                    }\n                }\n            ],\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_citation\",\n                    \"persistent_id\": \"CitationPersistentID1\",\n                    \"content\": [\n                        \"Content 1\"\n                    ],\n                    \"xlink\": {\n                        \"actuate\": \"Actuate\",\n                        \"arcrole\": \"Arc Role\",\n                        \"href\": \"Href\",\n                        \"role\": \"Role\",\n                        \"show\": \"Show\",\n                        \"title\": \"Title\",\n                        \"type\": \"Type\"\n                    },\n                    \"publish\": true\n                },\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Content 1\",\n                    \"publish\": true\n                }\n            ],\n            \"subjects\": [\n                {\n                    \"ref\": \"{{GEOG_SUBJ}}\"\n                }\n            ]\n        }\n    ],\n    \"agent_occupations\": [\n        {\n            \"publish\": true,\n            \"jsonmodel_type\": \"agent_occupation\",\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Text content\",\n                    \"publish\": true\n                }\n            ],\n            \"dates\": [],\n            \"subjects\": [\n                {\n                    \"ref\": \"{{OCC_SUBJ}}\"\n                }\n            ],\n            \"places\": [\n                {\n                    \"ref\": \"{{GEOG_SUBJ}}\"\n                }\n            ]\n        }\n    ],\n    \"agent_functions\": [\n        {\n            \"publish\": true,\n            \"jsonmodel_type\": \"agent_function\",\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Content 1\",\n                    \"publish\": true\n                }\n            ],\n            \"dates\": [\n                {\n                    \"date_type_structured\": \"single\",\n                    \"date_label\": \"usage\",\n                    \"date_certainty\": \"approximate\",\n                    \"date_era\": \"ce\",\n                    \"date_calendar\": \"gregorian\",\n                    \"jsonmodel_type\": \"structured_date_label\",\n                    \"structured_date_single\": {\n                        \"date_expression\": \"1800\",\n                        \"date_standardized\": \"1800\",\n                        \"date_role\": \"begin\",\n                        \"date_standardized_type\": \"standard\",\n                        \"jsonmodel_type\": \"structured_date_single\"\n                    }\n                }\n            ],\n            \"subjects\": [\n                {\n                    \"ref\": \"{{FUNC_SUBJ}}\"\n                }\n            ],\n            \"places\": [\n                {\n                    \"ref\": \"{{GEOG_SUBJ}}\"\n                }\n            ]\n        }\n    ],\n    \"agent_topics\": [\n        {\n            \"publish\": true,\n            \"jsonmodel_type\": \"agent_topic\",\n            \"dates\": [],\n            \"notes\": [],\n            \"subjects\": [\n                {\n                    \"ref\": \"{{TOP_SUBJ}}\"\n                }\n            ],\n            \"places\": []\n        }\n    ],\n    \"agent_resources\": [\n        {\n            \"linked_resource\": \"Related External Resource 1\",\n            \"linked_resource_description\": \"Description\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"publish\": true,\n            \"linked_agent_role\": \"creator\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_resource\",\n            \"dates\": [\n                {\n                    \"date_type_structured\": \"single\",\n                    \"date_label\": \"usage\",\n                    \"date_certainty\": \"approximate\",\n                    \"date_era\": \"ce\",\n                    \"date_calendar\": \"gregorian\",\n                    \"jsonmodel_type\": \"structured_date_label\",\n                    \"structured_date_single\": {\n                        \"date_expression\": \"1800\",\n                        \"date_standardized\": \"1900\",\n                        \"date_role\": \"begin\",\n                        \"date_standardized_type\": \"standard\",\n                        \"jsonmodel_type\": \"structured_date_single\"\n                    }\n                }\n            ],\n            \"places\": [\n                {\n                    \"ref\": \"{{GEOG_SUBJ}}\"\n                }\n            ]\n        },\n        {\n            \"linked_resource\": \"Related External Resource 2\",\n            \"linked_resource_description\": \"Description\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"publish\": true,\n            \"linked_agent_role\": \"source\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_resource\",\n            \"dates\": [],\n            \"places\": []\n        }\n    ],\n    \"linked_agent_roles\": [],\n    \"external_documents\": [\n        {\n            \"title\": \"External Document Title 1\",\n            \"location\": \"Location 1\",\n            \"publish\": true,\n            \"jsonmodel_type\": \"external_document\"\n        },\n        {\n            \"title\": \"External Document Title 2\",\n            \"location\": \"Location 2\",\n            \"publish\": true,\n            \"jsonmodel_type\": \"external_document\"\n        }\n    ],\n    \"notes\": [\n        {\n            \"jsonmodel_type\": \"note_bioghist\",\n            \"persistent_id\": \"BiogHistPersistentID1\",\n            \"label\": \"Biographical note\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_abstract\",\n                    \"persistent_id\": \"SubPersistentID1\",\n                    \"publish\": true,\n                    \"content\": [\n                        \"Abstract 1 Content 1.\",\n                        \"Abstract 1 Content 2.\"\n                    ]\n                }\n            ],\n            \"publish\": true\n        },\n        {\n            \"jsonmodel_type\": \"note_general_context\",\n            \"persistent_id\": \"GeneralPersistentID1\",\n            \"label\": \"General Context 1\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Content 1.\",\n                    \"publish\": false\n                },\n                {\n                    \"jsonmodel_type\": \"note_definedlist\",\n                    \"title\": \"Defined List\",\n                    \"publish\": true,\n                    \"items\": [\n                        {\n                            \"label\": \"Item\",\n                            \"value\": \"1\"\n                        },\n                        {\n                            \"label\": \"Item\",\n                            \"value\": \"2\"\n                        }\n                    ]\n                },\n                {\n                    \"jsonmodel_type\": \"note_outline\",\n                    \"publish\": true,\n                    \"levels\": [\n                        {\n                            \"jsonmodel_type\": \"note_outline_level\",\n                            \"items\": [\n                                {\n                                    \"jsonmodel_type\": \"note_outline_level\",\n                                    \"items\": [\n                                        \"Item 1\",\n                                        \"Item 2\",\n                                        {\n                                            \"jsonmodel_type\": \"note_outline_level\",\n                                            \"items\": [\n                                                \"Item 3\"\n                                            ]\n                                        }\n                                    ]\n                                }\n                            ]\n                        }\n                    ]\n                }\n            ],\n            \"publish\": true\n        }\n    ],\n    \"used_within_repositories\": [],\n    \"used_within_published_repositories\": [],\n    \"dates_of_existence\": [\n        {\n            \"date_type_structured\": \"range\",\n            \"date_label\": \"existence\",\n            \"date_certainty\": \"approximate\",\n            \"date_era\": \"ce\",\n            \"date_calendar\": \"gregorian\",\n            \"jsonmodel_type\": \"structured_date_label\",\n            \"structured_date_range\": {\n                \"begin_date_expression\": \"1800\",\n                \"begin_date_standardized\": \"1800-01-01\",\n                \"end_date_expression\": \"1900\",\n                \"end_date_standardized\": \"1900-12-31\",\n                \"begin_date_standardized_type\": \"standard\",\n                \"end_date_standardized_type\": \"standard\",\n                \"jsonmodel_type\": \"structured_date_range\"\n            }\n        },\n        {\n            \"date_type_structured\": \"single\",\n            \"date_label\": \"existence\",\n            \"date_certainty\": \"inferred\",\n            \"date_era\": \"ce\",\n            \"date_calendar\": \"gregorian\",\n            \"jsonmodel_type\": \"structured_date_label\",\n            \"structured_date_single\": {\n                \"date_expression\": \"1800\",\n                \"date_standardized\": \"1800\",\n                \"date_role\": \"begin\",\n                \"date_standardized_type\": \"not_before\",\n                \"jsonmodel_type\": \"structured_date_single\"\n            }\n        }\n    ],\n    \"used_languages\": [\n        {\n            \"language\": \"eng\",\n            \"script\": \"Latn\",\n            \"jsonmodel_type\": \"used_language\",\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Content 1\",\n                    \"publish\": true\n                }\n            ]\n        }\n    ],\n    \"metadata_rights_declarations\": [\n        {\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"license\": \"public_domain\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"metadata_rights_declaration\"\n        },\n        {\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"license\": \"non_commercial_no_derivatives\",\n            \"file_version_xlink_actuate_attribute\": \"onLoad\",\n            \"file_version_xlink_show_attribute\": \"new\",\n            \"jsonmodel_type\": \"metadata_rights_declaration\"\n        }\n    ],\n    \"names\": [\n        {\n            \"primary_name\": \"Primary 1\",\n            \"subordinate_name_1\": \"Sub 1-1\",\n            \"subordinate_name_2\": \"Sub 1-2\",\n            \"number\": \"Number\",\n            \"dates\": \"1800-1900\",\n            \"qualifier\": \"Qualifier 1\",\n            \"sort_name_auto_generate\": true,\n            \"authorized\": true,\n            \"is_display_name\": true,\n            \"location\": \"Location 1\",\n            \"jurisdiction\": false,\n            \"conference_meeting\": true,\n            \"source\": \"local\",\n            \"rules\": \"aacr\",\n            \"language\": \"eng\",\n            \"script\": \"Latn\",\n            \"transliteration\": \"ala-lc\",\n            \"jsonmodel_type\": \"name_corporate_entity\",\n            \"use_dates\": [\n                {\n                    \"date_type_structured\": \"range\",\n                    \"date_label\": \"usage\",\n                    \"date_certainty\": \"approximate\",\n                    \"date_era\": \"ce\",\n                    \"date_calendar\": \"gregorian\",\n                    \"jsonmodel_type\": \"structured_date_label\",\n                    \"structured_date_range\": {\n                        \"begin_date_expression\": \"1800\",\n                        \"begin_date_standardized\": \"1800\",\n                        \"end_date_expression\": \"1900\",\n                        \"end_date_standardized\": \"1900\",\n                        \"begin_date_standardized_type\": \"standard\",\n                        \"end_date_standardized_type\": \"standard\",\n                        \"jsonmodel_type\": \"structured_date_range\"\n                    }\n                }\n            ],\n            \"parallel_names\": [\n                {\n                    \"location\": \"Location 2\",\n                    \"jurisdiction\": true,\n                    \"conference_meeting\": false,\n                    \"primary_name\": \"Parallel Primary 1\",\n                    \"subordinate_name_1\": \"Sub Parallel 1-1\",\n                    \"subordinate_name_2\": \"Sub Parallel 1-2\",\n                    \"number\": \"Parallel Number\",\n                    \"dates\": \"Parallel Dates\",\n                    \"qualifier\": \"Parallel Qualifier\",\n                    \"sort_name_auto_generate\": true,\n                    \"language\": \"eng\",\n                    \"script\": \"Latn\",\n                    \"transliteration\": \"ala-lc\",\n                    \"jsonmodel_type\": \"parallel_name_corporate_entity\",\n                    \"use_dates\": [\n                        {\n                            \"date_type_structured\": \"single\",\n                            \"date_label\": \"usage\",\n                            \"date_certainty\": \"questionable\",\n                            \"date_era\": \"ce\",\n                            \"date_calendar\": \"gregorian\",\n                            \"jsonmodel_type\": \"structured_date_label\",\n                            \"structured_date_single\": {\n                                \"date_expression\": \"1900\",\n                                \"date_standardized\": \"1900\",\n                                \"date_role\": \"begin\",\n                                \"date_standardized_type\": \"standard\",\n                                \"jsonmodel_type\": \"structured_date_single\"\n                            }\n                        }\n                    ]\n                }\n            ],\n            \"authority_id\": \"{{$randomInt}}\"\n        },\n        {\n            \"primary_name\": \"Primary 2\",\n            \"subordinate_name_1\": \"Sub 2-1\",\n            \"subordinate_name_2\": \"Sub 2-2\",\n            \"number\": \"Number\",\n            \"dates\": \"Dates\",\n            \"qualifier\": \"Qualifier\",\n            \"sort_name_auto_generate\": true,\n            \"source\": \"naf\",\n            \"rules\": \"dacs\",\n            \"language\": \"ger\",\n            \"script\": \"Latf\",\n            \"jsonmodel_type\": \"name_corporate_entity\",\n            \"use_dates\": [],\n            \"authorized\": false,\n            \"is_display_name\": false,\n            \"location\": \"Location 2\",\n            \"jurisdiction\": true,\n            \"conference_meeting\": false,\n            \"parallel_names\": [],\n            \"authority_id\": \"{{$randomInt}}\"\n        }\n    ],\n    \"related_agents\": [\n        {\n            \"jsonmodel_type\": \"agent_relationship_associative\",\n            \"description\": \"Description\",\n            \"relationship_uri\": \"Relationship URI\",\n            \"relator\": \"is_associative_with\",\n            \"dates\": {\n                \"date_type_structured\": \"range\",\n                \"date_label\": \"usage\",\n                \"date_certainty\": \"approximate\",\n                \"date_era\": \"ce\",\n                \"date_calendar\": \"gregorian\",\n                \"jsonmodel_type\": \"structured_date_label\",\n                \"structured_date_range\": {\n                    \"begin_date_expression\": \"1800\",\n                    \"begin_date_standardized\": \"1800\",\n                    \"end_date_expression\": \"1900\",\n                    \"end_date_standardized\": \"1900\",\n                    \"begin_date_standardized_type\": \"standard\",\n                    \"end_date_standardized_type\": \"standard\",\n                    \"jsonmodel_type\": \"structured_date_range\"\n                }\n            },\n            \"ref\": \"/agents/people/1\"\n        },\n        {\n            \"jsonmodel_type\": \"agent_relationship_hierarchical\",\n            \"description\": \"Description\",\n            \"relationship_uri\": \"Relationship URI\",\n            \"relator\": \"is_hierarchical_with\",\n            \"ref\": \"/agents/people/1\"\n        }\n    ],\n    \"agent_type\": \"agent_corporate_entity\",\n    \"is_linked_to_published_record\": false,\n    \"display_name\": {\n        \"primary_name\": \"Primary 1\",\n        \"subordinate_name_1\": \"Sub 1-1\",\n        \"subordinate_name_2\": \"Sub 1-2\",\n        \"number\": \"Number\",\n        \"dates\": \"1800-1900\",\n        \"qualifier\": \"Qualifier 1\",\n        \"sort_name_auto_generate\": true,\n        \"authorized\": true,\n        \"is_display_name\": true,\n        \"location\": \"Location 1\",\n        \"jurisdiction\": false,\n        \"conference_meeting\": true,\n        \"source\": \"local\",\n        \"rules\": \"aacr\",\n        \"language\": \"eng\",\n        \"script\": \"Latn\",\n        \"transliteration\": \"ala-lc\",\n        \"jsonmodel_type\": \"name_corporate_entity\",\n        \"use_dates\": [\n            {\n                \"date_type_structured\": \"range\",\n                \"date_label\": \"usage\",\n                \"date_certainty\": \"approximate\",\n                \"date_era\": \"ce\",\n                \"date_calendar\": \"gregorian\",\n                \"jsonmodel_type\": \"structured_date_label\",\n                \"structured_date_range\": {\n                    \"begin_date_expression\": \"1800\",\n                    \"begin_date_standardized\": \"1800\",\n                    \"end_date_expression\": \"1900\",\n                    \"end_date_standardized\": \"1900\",\n                    \"begin_date_standardized_type\": \"standard\",\n                    \"end_date_standardized_type\": \"standard\",\n                    \"jsonmodel_type\": \"structured_date_range\"\n                }\n            }\n        ],\n        \"parallel_names\": [\n            {\n                \"primary_name\": \"Parallel Primary 1\",\n                \"subordinate_name_1\": \"Sub Parallel 1-1\",\n                \"subordinate_name_2\": \"Sub Parallel 1-2\",\n                \"number\": \"Parallel Number\",\n                \"dates\": \"Parallel Dates\",\n                \"qualifier\": \"Parallel Qualifier\",\n                \"sort_name_auto_generate\": true,\n                \"language\": \"eng\",\n                \"script\": \"Latn\",\n                \"transliteration\": \"ala-lc\",\n                \"jsonmodel_type\": \"parallel_name_corporate_entity\",\n                \"use_dates\": [\n                    {\n                        \"date_type_structured\": \"single\",\n                        \"date_label\": \"usage\",\n                        \"date_certainty\": \"questionable\",\n                        \"date_era\": \"ce\",\n                        \"date_calendar\": \"gregorian\",\n                        \"jsonmodel_type\": \"structured_date_label\",\n                        \"structured_date_single\": {\n                            \"date_expression\": \"1900\",\n                            \"date_standardized\": \"1900\",\n                            \"date_role\": \"begin\",\n                            \"date_standardized_type\": \"standard\",\n                            \"jsonmodel_type\": \"structured_date_single\"\n                        }\n                    }\n                ]\n            }\n        ],\n        \"authority_id\": \"{{$randomInt}}\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/agents/corporate_entities",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"agents",
+						"corporate_entities"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Full Family Agent",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"publish\": true,\n    \"jsonmodel_type\": \"agent_family\",\n    \"agent_contacts\": [\n        {\n            \"name\": \"Contact Name\",\n            \"address_1\": \"Address 1\",\n            \"address_2\": \"Address 2\",\n            \"address_3\": \"Address 3\",\n            \"city\": \"City\",\n            \"region\": \"State\",\n            \"country\": \"Country\",\n            \"post_code\": \"PostCode\",\n            \"email\": \"Email\",\n            \"salutation\": \"sir\",\n            \"jsonmodel_type\": \"agent_contact\",\n            \"telephones\": [\n                {\n                    \"number\": \"555-555-5555\",\n                    \"ext\": \"555\",\n                    \"number_type\": \"business\",\n                    \"jsonmodel_type\": \"telephone\",\n                    \"uri\": \"/telephone/2\"\n                }\n            ],\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_contact_note\",\n                    \"persistent_id\": \"ContactPersID1\",\n                    \"date_of_contact\": \"Date of Contact\",\n                    \"contact_notes\": \"Contact Note 1\",\n                    \"publish\": false\n                },\n                {\n                    \"jsonmodel_type\": \"note_contact_note\",\n                    \"persistent_id\": \"ContactPersID2\",\n                    \"date_of_contact\": \"Date of Contact\",\n                    \"contact_notes\": \"Contact Note 2\",\n                    \"publish\": false\n                }\n            ],\n            \"is_representative\": false\n        }\n    ],\n    \"agent_record_controls\": [\n        {\n            \"maintenance_agency\": \"DLC\",\n            \"agency_name\": \"Agency Name\",\n            \"maintenance_agency_note\": \"Maintenance Agency Note\",\n            \"language_note\": \"Language Note\",\n            \"maintenance_status\": \"revised_corrected\",\n            \"publication_status\": \"approved\",\n            \"romanization\": \"int_std\",\n            \"government_agency_type\": \"unknown\",\n            \"reference_evaluation\": \"tr_inconsistent\",\n            \"name_type\": \"differentiated\",\n            \"level_of_detail\": \"fully_established\",\n            \"modified_record\": \"not_modified\",\n            \"cataloging_source\": \"nat_bib_agency\",\n            \"language\": \"eng\",\n            \"script\": \"Latn\",\n            \"jsonmodel_type\": \"agent_record_control\"\n        }\n    ],\n    \"agent_alternate_sets\": [\n        {\n            \"set_component\": \"Set Component 1\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Role Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"replace\",\n            \"jsonmodel_type\": \"agent_alternate_set\"\n        },\n        {\n            \"set_component\": \"Set Component 2\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"file_version_xlink_actuate_attribute\": \"onLoad\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_alternate_set\"\n        }\n    ],\n    \"agent_conventions_declarations\": [\n        {\n            \"citation\": \"Citation 1\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"name_rule\": \"rda\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_conventions_declaration\"\n        },\n        {\n            \"citation\": \"Citation 2\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"name_rule\": \"aacr\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_conventions_declaration\"\n        }\n    ],\n    \"agent_other_agency_codes\": [\n        {\n            \"maintenance_agency\": \"Maintenance Agency 1\",\n            \"jsonmodel_type\": \"agent_other_agency_codes\"\n        },\n        {\n            \"maintenance_agency\": \"Maintenance Agency 2\",\n            \"agency_code_type\": \"oclc\",\n            \"jsonmodel_type\": \"agent_other_agency_codes\"\n        }\n    ],\n    \"agent_maintenance_histories\": [\n        {\n            \"event_date\": \"2025-07-18 00:00:00 UTC\",\n            \"agent\": \"Agent\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"maintenance_event_type\": \"created\",\n            \"maintenance_agent_type\": \"human\",\n            \"jsonmodel_type\": \"agent_maintenance_history\"\n        },\n        {\n            \"event_date\": \"2025-07-18 00:00:00 UTC\",\n            \"agent\": \"Agent\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"maintenance_event_type\": \"cancelled\",\n            \"maintenance_agent_type\": \"machine\",\n            \"jsonmodel_type\": \"agent_maintenance_history\"\n        }\n    ],\n    \"agent_record_identifiers\": [\n        {\n            \"primary_identifier\": true,\n            \"record_identifier\": \"n  6789\",\n            \"source\": \"naf\",\n            \"identifier_type\": \"loc\",\n            \"jsonmodel_type\": \"agent_record_identifier\"\n        },\n        {\n            \"primary_identifier\": false,\n            \"record_identifier\": \"l 6789\",\n            \"source\": \"local\",\n            \"identifier_type\": \"other_unmapped\",\n            \"jsonmodel_type\": \"agent_record_identifier\"\n        }\n    ],\n    \"agent_identifiers\": [\n        {\n            \"entity_identifier\": \"Entity IDs 1\",\n            \"identifier_type\": \"loc\",\n            \"jsonmodel_type\": \"agent_identifier\"\n        },\n        {\n            \"entity_identifier\": \"Entity IDs 2\",\n            \"identifier_type\": \"lac\",\n            \"jsonmodel_type\": \"agent_identifier\"\n        }\n    ],\n    \"agent_sources\": [\n        {\n            \"source_entry\": \"Source Entry 1\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"file_version_xlink_actuate_attribute\": \"onRequest\",\n            \"file_version_xlink_show_attribute\": \"none\",\n            \"jsonmodel_type\": \"agent_sources\"\n        },\n        {\n            \"source_entry\": \"Source Entry 2\",\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"file_version_xlink_actuate_attribute\": \"other\",\n            \"file_version_xlink_show_attribute\": \"other\",\n            \"jsonmodel_type\": \"agent_sources\"\n        }\n    ],\n    \"agent_places\": [\n        {\n            \"publish\": true,\n            \"place_role\": \"assoc_country\",\n            \"jsonmodel_type\": \"agent_place\",\n            \"dates\": [\n                {\n                    \"date_type_structured\": \"single\",\n                    \"date_label\": \"usage\",\n                    \"date_certainty\": \"questionable\",\n                    \"date_era\": \"ce\",\n                    \"date_calendar\": \"gregorian\",\n                    \"jsonmodel_type\": \"structured_date_label\",\n                    \"structured_date_single\": {\n                        \"date_expression\": \"1800\",\n                        \"date_standardized\": \"1800\",\n                        \"date_role\": \"begin\",\n                        \"date_standardized_type\": \"standard\",\n                        \"jsonmodel_type\": \"structured_date_single\"\n                    }\n                }\n            ],\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_citation\",\n                    \"persistent_id\": \"CitationPersistentID1\",\n                    \"content\": [\n                        \"Content 1\"\n                    ],\n                    \"xlink\": {\n                        \"actuate\": \"Actuate\",\n                        \"arcrole\": \"Arc Role\",\n                        \"href\": \"Href\",\n                        \"role\": \"Role\",\n                        \"show\": \"Show\",\n                        \"title\": \"Title\",\n                        \"type\": \"Type\"\n                    },\n                    \"publish\": true\n                },\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Content 1\",\n                    \"publish\": true\n                }\n            ],\n            \"subjects\": [\n                {\n                    \"ref\": \"{{GEOG_SUBJ}}\"\n                }\n            ]\n        }\n    ],\n    \"agent_occupations\": [\n        {\n            \"publish\": true,\n            \"jsonmodel_type\": \"agent_occupation\",\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Text content\",\n                    \"publish\": true\n                }\n            ],\n            \"dates\": [],\n            \"subjects\": [\n                {\n                    \"ref\": \"{{OCC_SUBJ}}\"\n                }\n            ],\n            \"places\": [\n                {\n                    \"ref\": \"{{GEOG_SUBJ}}\"\n                }\n            ]\n        }\n    ],\n    \"agent_functions\": [\n        {\n            \"publish\": true,\n            \"jsonmodel_type\": \"agent_function\",\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Content 1\",\n                    \"publish\": true\n                }\n            ],\n            \"dates\": [\n                {\n                    \"date_type_structured\": \"single\",\n                    \"date_label\": \"usage\",\n                    \"date_certainty\": \"approximate\",\n                    \"date_era\": \"ce\",\n                    \"date_calendar\": \"gregorian\",\n                    \"jsonmodel_type\": \"structured_date_label\",\n                    \"structured_date_single\": {\n                        \"date_expression\": \"1800\",\n                        \"date_standardized\": \"1800\",\n                        \"date_role\": \"begin\",\n                        \"date_standardized_type\": \"standard\",\n                        \"jsonmodel_type\": \"structured_date_single\"\n                    }\n                }\n            ],\n            \"subjects\": [\n                {\n                    \"ref\": \"{{FUNC_SUBJ}}\"\n                }\n            ],\n            \"places\": [\n                {\n                    \"ref\": \"{{GEOG_SUBJ}}\"\n                }\n            ]\n        }\n    ],\n    \"agent_topics\": [\n        {\n            \"publish\": true,\n            \"jsonmodel_type\": \"agent_topic\",\n            \"dates\": [],\n            \"notes\": [],\n            \"subjects\": [\n                {\n                    \"ref\": \"{{TOP_SUBJ}}\"\n                }\n            ],\n            \"places\": []\n        }\n    ],\n    \"agent_resources\": [\n        {\n            \"linked_resource\": \"Related External Resource 1\",\n            \"linked_resource_description\": \"Description\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"publish\": true,\n            \"linked_agent_role\": \"creator\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_resource\",\n            \"dates\": [\n                {\n                    \"date_type_structured\": \"single\",\n                    \"date_label\": \"usage\",\n                    \"date_certainty\": \"approximate\",\n                    \"date_era\": \"ce\",\n                    \"date_calendar\": \"gregorian\",\n                    \"jsonmodel_type\": \"structured_date_label\",\n                    \"structured_date_single\": {\n                        \"date_expression\": \"1800\",\n                        \"date_standardized\": \"1900\",\n                        \"date_role\": \"begin\",\n                        \"date_standardized_type\": \"standard\",\n                        \"jsonmodel_type\": \"structured_date_single\"\n                    }\n                }\n            ],\n            \"places\": [\n                {\n                    \"ref\": \"{{GEOG_SUBJ}}\"\n                }\n            ]\n        },\n        {\n            \"linked_resource\": \"Related External Resource 2\",\n            \"linked_resource_description\": \"Description\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"publish\": true,\n            \"linked_agent_role\": \"source\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"agent_resource\",\n            \"dates\": [],\n            \"places\": []\n        }\n    ],\n    \"linked_agent_roles\": [],\n    \"external_documents\": [\n        {\n            \"title\": \"External Document Title 1\",\n            \"location\": \"Location 1\",\n            \"publish\": true,\n            \"jsonmodel_type\": \"external_document\"\n        },\n        {\n            \"title\": \"External Document Title 2\",\n            \"location\": \"Location 2\",\n            \"publish\": true,\n            \"jsonmodel_type\": \"external_document\"\n        }\n    ],\n    \"notes\": [\n        {\n            \"jsonmodel_type\": \"note_bioghist\",\n            \"persistent_id\": \"BiogHistPersistentID1\",\n            \"label\": \"Biographical note\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_abstract\",\n                    \"persistent_id\": \"SubPersistentID1\",\n                    \"publish\": true,\n                    \"content\": [\n                        \"Abstract 1 Content 1.\",\n                        \"Abstract 1 Content 2.\"\n                    ]\n                }\n            ],\n            \"publish\": true\n        },\n        {\n            \"jsonmodel_type\": \"note_general_context\",\n            \"persistent_id\": \"GeneralPersistentID1\",\n            \"label\": \"General Context 1\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Content 1.\",\n                    \"publish\": false\n                },\n                {\n                    \"jsonmodel_type\": \"note_definedlist\",\n                    \"title\": \"Defined List\",\n                    \"publish\": true,\n                    \"items\": [\n                        {\n                            \"label\": \"Item\",\n                            \"value\": \"1\"\n                        },\n                        {\n                            \"label\": \"Item\",\n                            \"value\": \"2\"\n                        }\n                    ]\n                },\n                {\n                    \"jsonmodel_type\": \"note_outline\",\n                    \"publish\": true,\n                    \"levels\": [\n                        {\n                            \"jsonmodel_type\": \"note_outline_level\",\n                            \"items\": [\n                                {\n                                    \"jsonmodel_type\": \"note_outline_level\",\n                                    \"items\": [\n                                        \"Item 1\",\n                                        \"Item 2\",\n                                        {\n                                            \"jsonmodel_type\": \"note_outline_level\",\n                                            \"items\": [\n                                                \"Item 3\"\n                                            ]\n                                        }\n                                    ]\n                                }\n                            ]\n                        }\n                    ]\n                }\n            ],\n            \"publish\": true\n        }\n    ],\n    \"used_within_repositories\": [],\n    \"used_within_published_repositories\": [],\n    \"dates_of_existence\": [\n        {\n            \"date_type_structured\": \"range\",\n            \"date_label\": \"existence\",\n            \"date_certainty\": \"approximate\",\n            \"date_era\": \"ce\",\n            \"date_calendar\": \"gregorian\",\n            \"jsonmodel_type\": \"structured_date_label\",\n            \"structured_date_range\": {\n                \"begin_date_expression\": \"1800\",\n                \"begin_date_standardized\": \"1800-01-01\",\n                \"end_date_expression\": \"1900\",\n                \"end_date_standardized\": \"1900-12-31\",\n                \"begin_date_standardized_type\": \"standard\",\n                \"end_date_standardized_type\": \"standard\",\n                \"jsonmodel_type\": \"structured_date_range\"\n            }\n        },\n        {\n            \"date_type_structured\": \"single\",\n            \"date_label\": \"existence\",\n            \"date_certainty\": \"inferred\",\n            \"date_era\": \"ce\",\n            \"date_calendar\": \"gregorian\",\n            \"jsonmodel_type\": \"structured_date_label\",\n            \"structured_date_single\": {\n                \"date_expression\": \"1800\",\n                \"date_standardized\": \"1800\",\n                \"date_role\": \"begin\",\n                \"date_standardized_type\": \"not_before\",\n                \"jsonmodel_type\": \"structured_date_single\"\n            }\n        }\n    ],\n    \"used_languages\": [\n        {\n            \"language\": \"eng\",\n            \"script\": \"Latn\",\n            \"jsonmodel_type\": \"used_language\",\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Content 1\",\n                    \"publish\": true\n                }\n            ]\n        }\n    ],\n    \"metadata_rights_declarations\": [\n        {\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"license\": \"public_domain\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"metadata_rights_declaration\"\n        },\n        {\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-07-18 00:00:00 UTC\",\n            \"license\": \"non_commercial_no_derivatives\",\n            \"file_version_xlink_actuate_attribute\": \"onLoad\",\n            \"file_version_xlink_show_attribute\": \"new\",\n            \"jsonmodel_type\": \"metadata_rights_declaration\"\n        }\n    ],\n    \"names\": [\n        {\n            \"family_name\": \"Family 1\",\n            \"prefix\": \"Prefix 1\",\n            \"family_type\": \"Type 1\",\n            \"number\": \"Number\",\n            \"dates\": \"1800-1900\",\n            \"qualifier\": \"Qualifier 1\",\n            \"sort_name_auto_generate\": true,\n            \"authorized\": true,\n            \"is_display_name\": true,\n            \"location\": \"Location 1\",\n            \"source\": \"local\",\n            \"rules\": \"aacr\",\n            \"language\": \"eng\",\n            \"script\": \"Latn\",\n            \"transliteration\": \"ala-lc\",\n            \"jsonmodel_type\": \"name_family\",\n            \"use_dates\": [\n                {\n                    \"date_type_structured\": \"range\",\n                    \"date_label\": \"usage\",\n                    \"date_certainty\": \"approximate\",\n                    \"date_era\": \"ce\",\n                    \"date_calendar\": \"gregorian\",\n                    \"jsonmodel_type\": \"structured_date_label\",\n                    \"structured_date_range\": {\n                        \"begin_date_expression\": \"1800\",\n                        \"begin_date_standardized\": \"1800\",\n                        \"end_date_expression\": \"1900\",\n                        \"end_date_standardized\": \"1900\",\n                        \"begin_date_standardized_type\": \"standard\",\n                        \"end_date_standardized_type\": \"standard\",\n                        \"jsonmodel_type\": \"structured_date_range\"\n                    }\n                }\n            ],\n            \"parallel_names\": [\n                {\n                    \"location\": \"Location 2\",\n                    \"family_name\": \"Parallel Family 1\",\n                    \"prefix\": \"Parallel Prefix 1\",\n                    \"family_type\": \"Type Parallel 1\",\n                    \"number\": \"Parallel Number\",\n                    \"dates\": \"Parallel Dates\",\n                    \"qualifier\": \"Parallel Qualifier\",\n                    \"sort_name_auto_generate\": true,\n                    \"language\": \"eng\",\n                    \"script\": \"Latn\",\n                    \"transliteration\": \"ala-lc\",\n                    \"jsonmodel_type\": \"parallel_name_family\",\n                    \"use_dates\": [\n                        {\n                            \"date_type_structured\": \"single\",\n                            \"date_label\": \"usage\",\n                            \"date_certainty\": \"questionable\",\n                            \"date_era\": \"ce\",\n                            \"date_calendar\": \"gregorian\",\n                            \"jsonmodel_type\": \"structured_date_label\",\n                            \"structured_date_single\": {\n                                \"date_expression\": \"1900\",\n                                \"date_standardized\": \"1900\",\n                                \"date_role\": \"begin\",\n                                \"date_standardized_type\": \"standard\",\n                                \"jsonmodel_type\": \"structured_date_single\"\n                            }\n                        }\n                    ]\n                }\n            ],\n            \"authority_id\": \"{{$randomInt}}\"\n        },\n        {\n            \"family_name\": \"Family 2\",\n            \"prefix\": \"Prefix 2\",\n            \"family_type\": \"Type 2\",\n            \"number\": \"Number\",\n            \"dates\": \"Dates\",\n            \"qualifier\": \"Qualifier\",\n            \"sort_name_auto_generate\": true,\n            \"source\": \"naf\",\n            \"rules\": \"dacs\",\n            \"language\": \"ger\",\n            \"script\": \"Latf\",\n            \"jsonmodel_type\": \"name_family\",\n            \"use_dates\": [],\n            \"authorized\": false,\n            \"is_display_name\": false,\n            \"location\": \"Location 2\",\n            \"parallel_names\": [],\n            \"authority_id\": \"{{$randomInt}}\"\n        }\n    ],\n    \"related_agents\": [\n        {\n            \"jsonmodel_type\": \"agent_relationship_associative\",\n            \"description\": \"Description\",\n            \"relationship_uri\": \"Relationship URI\",\n            \"relator\": \"is_associative_with\",\n            \"dates\": {\n                \"date_type_structured\": \"range\",\n                \"date_label\": \"usage\",\n                \"date_certainty\": \"approximate\",\n                \"date_era\": \"ce\",\n                \"date_calendar\": \"gregorian\",\n                \"jsonmodel_type\": \"structured_date_label\",\n                \"structured_date_range\": {\n                    \"begin_date_expression\": \"1800\",\n                    \"begin_date_standardized\": \"1800\",\n                    \"end_date_expression\": \"1900\",\n                    \"end_date_standardized\": \"1900\",\n                    \"begin_date_standardized_type\": \"standard\",\n                    \"end_date_standardized_type\": \"standard\",\n                    \"jsonmodel_type\": \"structured_date_range\"\n                }\n            },\n            \"ref\": \"/agents/people/1\"\n        },\n        {\n            \"jsonmodel_type\": \"agent_relationship_hierarchical\",\n            \"description\": \"Description\",\n            \"relationship_uri\": \"Relationship URI\",\n            \"relator\": \"is_hierarchical_with\",\n            \"ref\": \"/agents/people/1\"\n        }\n    ],\n    \"agent_type\": \"agent_family\",\n    \"is_linked_to_published_record\": false,\n    \"display_name\": {\n        \"primary_name\": \"Primary 1\",\n        \"subordinate_name_1\": \"Sub 1-1\",\n        \"subordinate_name_2\": \"Sub 1-2\",\n        \"number\": \"Number\",\n        \"dates\": \"1800-1900\",\n        \"qualifier\": \"Qualifier 1\",\n        \"sort_name_auto_generate\": true,\n        \"authorized\": true,\n        \"is_display_name\": true,\n        \"location\": \"Location 1\",\n        \"jurisdiction\": false,\n        \"conference_meeting\": true,\n        \"source\": \"local\",\n        \"rules\": \"aacr\",\n        \"language\": \"eng\",\n        \"script\": \"Latn\",\n        \"transliteration\": \"ala-lc\",\n        \"jsonmodel_type\": \"name_family\",\n        \"use_dates\": [\n            {\n                \"date_type_structured\": \"range\",\n                \"date_label\": \"usage\",\n                \"date_certainty\": \"approximate\",\n                \"date_era\": \"ce\",\n                \"date_calendar\": \"gregorian\",\n                \"jsonmodel_type\": \"structured_date_label\",\n                \"structured_date_range\": {\n                    \"begin_date_expression\": \"1800\",\n                    \"begin_date_standardized\": \"1800\",\n                    \"end_date_expression\": \"1900\",\n                    \"end_date_standardized\": \"1900\",\n                    \"begin_date_standardized_type\": \"standard\",\n                    \"end_date_standardized_type\": \"standard\",\n                    \"jsonmodel_type\": \"structured_date_range\"\n                }\n            }\n        ],\n        \"parallel_names\": [\n            {\n                \"primary_name\": \"Parallel Primary 1\",\n                \"subordinate_name_1\": \"Sub Parallel 1-1\",\n                \"subordinate_name_2\": \"Sub Parallel 1-2\",\n                \"number\": \"Parallel Number\",\n                \"dates\": \"Parallel Dates\",\n                \"qualifier\": \"Parallel Qualifier\",\n                \"sort_name_auto_generate\": true,\n                \"language\": \"eng\",\n                \"script\": \"Latn\",\n                \"transliteration\": \"ala-lc\",\n                \"jsonmodel_type\": \"parallel_name_family\",\n                \"use_dates\": [\n                    {\n                        \"date_type_structured\": \"single\",\n                        \"date_label\": \"usage\",\n                        \"date_certainty\": \"questionable\",\n                        \"date_era\": \"ce\",\n                        \"date_calendar\": \"gregorian\",\n                        \"jsonmodel_type\": \"structured_date_label\",\n                        \"structured_date_single\": {\n                            \"date_expression\": \"1900\",\n                            \"date_standardized\": \"1900\",\n                            \"date_role\": \"begin\",\n                            \"date_standardized_type\": \"standard\",\n                            \"jsonmodel_type\": \"structured_date_single\"\n                        }\n                    }\n                ]\n            }\n        ],\n        \"authority_id\": \"{{$randomInt}}\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/agents/families",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"agents",
+						"families"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Full Resource",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const getClassifications = {",
+							"    url: pm.environment.get(\"ASPACE_BACKEND_URL\") + \"/repositories/\" + pm.collectionVariables.get(\"REPOSITORY_ID\") + \"/classifications?page=1\",",
+							"    method: 'GET',",
+							"    header: {",
+							"        'Content-Type': 'application/json',",
+							"        'X-ArchivesSpace-Session': pm.environment.get(\"SESSION\")",
+							"    }",
+							"};",
+							"",
+							"pm.sendRequest(getClassifications, function (err, response) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        const responseData = response.json();",
+							"        if (responseData && responseData.results.length > 0) {",
+							"            const randomIndex = Math.floor(Math.random() * responseData.results.length);",
+							"            pm.variables.set(\"classification\", responseData.results[randomIndex].uri);",
+							"        } else {",
+							"            pm.variables.set(\"classification\", \"\");",
+							"        }",
+							"    }",
+							"});",
+							"",
+							"const getAccessions = {",
+							"    url: pm.environment.get(\"ASPACE_BACKEND_URL\") + \"/repositories/\" + pm.collectionVariables.get(\"REPOSITORY_ID\") + \"/accessions?page=1\",",
+							"    method: 'GET',",
+							"    header: {",
+							"        'Content-Type': 'application/json',",
+							"        'X-ArchivesSpace-Session': pm.environment.get(\"SESSION\")",
+							"    }",
+							"};",
+							"",
+							"pm.sendRequest(getAccessions, function (err, response) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        const responseData = response.json();",
+							"        if (responseData && responseData.results.length > 0) {",
+							"            const randomIndex = Math.floor(Math.random() * responseData.results.length);",
+							"            pm.variables.set(\"accession\", responseData.results[randomIndex].uri);",
+							"        } else {",
+							"            pm.variables.set(\"accession\", \"\");",
+							"        }",
+							"    }",
+							"});",
+							"",
+							"const getDigitalObjects = {",
+							"    url: pm.environment.get(\"ASPACE_BACKEND_URL\") + \"/repositories/\" + pm.collectionVariables.get(\"REPOSITORY_ID\") + \"/digital_objects?page=1\",",
+							"    method: 'GET',",
+							"    header: {",
+							"        'Content-Type': 'application/json',",
+							"        'X-ArchivesSpace-Session': pm.environment.get(\"SESSION\")",
+							"    }",
+							"};",
+							"",
+							"pm.sendRequest(getDigitalObjects, function (err, response) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        const responseData = response.json();",
+							"        if (responseData && responseData.results.length > 0) {",
+							"            const randomIndex = Math.floor(Math.random() * responseData.results.length);",
+							"            pm.variables.set(\"digital_object\", responseData.results[randomIndex].uri);",
+							"        } else {",
+							"            pm.variables.set(\"digital_object\", \"\");",
+							"        }",
+							"    }",
+							"});",
+							"",
+							"const getTopContainers = {",
+							"    url: pm.environment.get(\"ASPACE_BACKEND_URL\") + \"/repositories/\" + pm.collectionVariables.get(\"REPOSITORY_ID\") + \"/top_containers?page=1\",",
+							"    method: 'GET',",
+							"    header: {",
+							"        'Content-Type': 'application/json',",
+							"        'X-ArchivesSpace-Session': pm.environment.get(\"SESSION\")",
+							"    }",
+							"};",
+							"",
+							"pm.sendRequest(getTopContainers, function (err, response) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        const responseData = response.json();",
+							"        if (responseData && responseData.results.length > 0) {",
+							"            const randomIndex = Math.floor(Math.random() * responseData.results.length);",
+							"            pm.variables.set(\"top_container\", responseData.results[randomIndex].uri);",
+							"        } else {",
+							"            pm.variables.set(\"top_container\", \"\");",
+							"        }",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Kitchen Sink resource\",\n    \"publish\": {{$randomBoolean}},\n    \"restrictions\": {{$randomBoolean}},\n    \"repository_processing_note\": \"Repository Processing Note\",\n    \"ead_id\": \"EAD.123456\",\n    \"ead_location\": \"http://example.com/EAD.123456\",\n    \"finding_aid_title\": \"Kitchen Sink resource\",\n    \"finding_aid_filing_title\": \"Kitchen Sink resource\",\n    \"finding_aid_date\": \"Finding Aid Date\",\n    \"finding_aid_author\": \"Finding Aid Author\",\n    \"finding_aid_language_note\": \"Language of Description Note\",\n    \"finding_aid_sponsor\": \"Sponsor\",\n    \"finding_aid_edition_statement\": \"Edition Statement\",\n    \"finding_aid_series_statement\": \"Series Statement\",\n    \"finding_aid_note\": \"Finding Aid Note\",\n    \"suppressed\": false,\n    \"finding_aid_subtitle\": \"Finding Aid Subtitle\",\n    \"is_slug_auto\": false,\n    \"id_0\": \"EAD\",\n    \"id_1\": \"123456\",\n    \"level\": \"collection\",\n    \"resource_type\": \"collection\",\n    \"finding_aid_description_rules\": \"cco\",\n    \"finding_aid_language\": \"eng\",\n    \"finding_aid_script\": \"Latn\",\n    \"finding_aid_status\": \"in_progress\",\n    \"external_ids\": [],\n    \"subjects\": [\n        {\n            \"ref\": \"{{GEOG_SUBJ}}\"\n        },\n        {\n            \"ref\": \"{{TOP_SUBJ}}\"\n        },\n        {\n            \"ref\": \"{{GENRE_SUBJ}}\"\n        }\n    ],\n    \"linked_events\": [],\n    \"extents\": [\n        {\n            \"number\": \"1\",\n            \"container_summary\": \"Container Summary\",\n            \"physical_details\": \"Physical Details\",\n            \"dimensions\": \"Dimensions\",\n            \"portion\": \"whole\",\n            \"extent_type\": \"cubic_feet\",\n            \"jsonmodel_type\": \"extent\"\n        },\n        {\n            \"number\": \"1\",\n            \"portion\": \"part\",\n            \"extent_type\": \"megabytes\",\n            \"jsonmodel_type\": \"extent\"\n        }\n    ],\n    \"lang_materials\": [\n        {\n            \"jsonmodel_type\": \"lang_material\",\n            \"notes\": [],\n            \"language_and_script\": {\n                \"language\": \"eng\",\n                \"script\": \"Latn\",\n                \"jsonmodel_type\": \"language_and_script\"\n            }\n        },\n        {\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_langmaterial\",\n                    \"label\": \"Language of Materials label\",\n                    \"type\": \"langmaterial\",\n                    \"content\": [\n                        \"Language of Materials note 1\",\n                        \"Language of Materials note 2\"\n                    ],\n                    \"publish\": {{$randomBoolean}}\n                }\n            ]\n        },\n        {\n            \"jsonmodel_type\": \"lang_material\",\n            \"notes\": [],\n            \"language_and_script\": {\n                \"language\": \"spa\",\n                \"script\": \"Latf\",\n                \"jsonmodel_type\": \"language_and_script\"\n            }\n        }\n    ],\n    \"dates\": [\n        {\n            \"expression\": \"1900-2000\",\n            \"begin\": \"1900-01-01\",\n            \"end\": \"2000-12-31\",\n            \"date_type\": \"inclusive\",\n            \"label\": \"creation\",\n            \"certainty\": \"approximate\",\n            \"era\": \"ce\",\n            \"calendar\": \"gregorian\",\n            \"jsonmodel_type\": \"date\"\n        },\n        {\n            \"expression\": \"1900\",\n            \"begin\": \"1900-01-01\",\n            \"date_type\": \"single\",\n            \"label\": \"broadcast\",\n            \"jsonmodel_type\": \"date\"\n        }\n    ],\n    \"external_documents\": [\n        {\n            \"title\": \"Title 1\",\n            \"location\": \"Location 2\",\n            \"publish\": {{$randomBoolean}},\n            \"jsonmodel_type\": \"external_document\"\n        },\n        {\n            \"title\": \"Title 2\",\n            \"location\": \"Location 2\",\n            \"publish\": {{$randomBoolean}},\n            \"jsonmodel_type\": \"external_document\"\n        }\n    ],\n    \"rights_statements\": [\n        {\n            \"start_date\": \"2025-08-01\",\n            \"end_date\": \"2025-08-12\",\n            \"determination_date\": \"2025-08-01\",\n            \"rights_type\": \"copyright\",\n            \"status\": \"copyrighted\",\n            \"jurisdiction\": \"US\",\n            \"jsonmodel_type\": \"rights_statement\",\n            \"external_documents\": [\n                {\n                    \"title\": \"Title 1\",\n                    \"location\": \"Location 1\",\n                    \"publish\": {{$randomBoolean}},\n                    \"identifier_type\": \"allmovie\",\n                    \"jsonmodel_type\": \"rights_statement_external_document\"\n                },\n                {\n                    \"title\": \"Title 2\",\n                    \"location\": \"Location 2\",\n                    \"publish\": {{$randomBoolean}},\n                    \"identifier_type\": \"agrovoc\",\n                    \"jsonmodel_type\": \"rights_statement_external_document\"\n                }\n            ],\n            \"acts\": [\n                {\n                    \"start_date\": \"2025-08-01\",\n                    \"end_date\": \"2025-08-08\",\n                    \"act_type\": \"disseminate\",\n                    \"restriction\": \"disallow\",\n                    \"jsonmodel_type\": \"rights_statement_act\",\n                    \"notes\": [\n                        {\n                            \"jsonmodel_type\": \"note_rights_statement_act\",\n                            \"label\": \"Expiration label\",\n                            \"type\": \"expiration\",\n                            \"content\": [\n                                \"Expiration content\"\n                            ],\n                            \"publish\": {{$randomBoolean}}\n                        }\n                    ]\n                }\n            ],\n            \"linked_agents\": [\n                {\n                    \"ref\": \"/agents/people/1\"\n                }\n            ],\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_rights_statement\",\n                    \"label\": \"Additional Information label\",\n                    \"type\": \"additional_information\",\n                    \"content\": [\n                        \"Additional Information Content 1\",\n                        \"Additional Information Content 2\"\n                    ],\n                    \"publish\": {{$randomBoolean}}\n                }\n            ]\n        },\n        {\n            \"statute_citation\": \"Statute Citation\",\n            \"start_date\": \"2025-08-02\",\n            \"end_date\": \"2025-08-03\",\n            \"determination_date\": \"2025-08-01\",\n            \"rights_type\": \"statute\",\n            \"jurisdiction\": \"AE\",\n            \"jsonmodel_type\": \"rights_statement\",\n            \"external_documents\": [],\n            \"acts\": [],\n            \"linked_agents\": [],\n            \"notes\": [\n                {\n                    \"jsonmodel_type\": \"note_rights_statement\",\n                    \"label\": \"Materials label\",\n                    \"type\": \"materials\",\n                    \"content\": [\n                        \"Materials content 1\",\n                        \"Materials content 2\"\n                    ],\n                    \"publish\": {{$randomBoolean}}\n                }\n            ]\n        }\n    ],\n    \"linked_agents\": [\n        {\n            \"title\": \"Ms.\",\n            \"is_primary\": false,\n            \"role\": \"creator\",\n            \"relator\": \"dfd\",\n            \"terms\": [],\n            \"ref\": \"/agents/people/1\"\n        },\n        {\n            \"is_primary\": false,\n            \"role\": \"subject\",\n            \"relator\": \"asn\",\n            \"terms\": [\n                {\n                    \"vocab_id\": 1,\n                    \"term\": \"Term 1\",\n                    \"term_type_id\": 1268,\n                    \"x_foreign_key_x\": 54,\n                    \"term_type\": \"function\",\n                    \"jsonmodel_type\": \"term\",\n                    \"uri\": \"/terms/21\",\n                    \"vocabulary\": \"/vocabularies/1\"\n                }\n            ],\n            \"ref\": \"/agents/software/1\"\n        },\n        {\n            \"is_primary\": false,\n            \"role\": \"source\",\n            \"relator\": \"aft\",\n            \"terms\": [],\n            \"ref\": \"/agents/people/1\"\n        }\n    ],\n    \"import_previous_arks\": [],\n    \"revision_statements\": [\n        {\n            \"date\": \"08/12/2025\",\n            \"description\": \"Revision Description 1\",\n            \"publish\": {{$randomBoolean}},\n            \"jsonmodel_type\": \"revision_statement\",\n            \"repository\": {\n                \"ref\": \"/repositories/{{REPOSITORY_ID}}\"\n            }\n        },\n        {\n            \"date\": \"08/11/2025\",\n            \"description\": \"Revision Description 2\",\n            \"publish\": {{$randomBoolean}},\n            \"jsonmodel_type\": \"revision_statement\",\n            \"repository\": {\n                \"ref\": \"/repositories/{{REPOSITORY_ID}}\"\n            }\n        }\n    ],\n    \"instances\": [\n        {\n            \"instance_type\": \"mixed_materials\",\n            \"jsonmodel_type\": \"instance\",\n            \"is_representative\": false,\n            \"sub_container\": {\n                \"indicator_2\": \"{{$randomInt}}\",\n                \"indicator_3\": \"{{$randomInt}}\",\n                \"barcode_2\": \"{{$randomInt}}\",\n                \"type_2\": \"folder\",\n                \"type_3\": \"folder\",\n                \"jsonmodel_type\": \"sub_container\",\n                \"top_container\": {\n                    \"ref\": \"{{top_container}}\"\n                }\n            }\n        },\n        {\n            \"instance_type\": \"digital_object\",\n            \"jsonmodel_type\": \"instance\",\n            \"is_representative\": false,\n            \"digital_object\": {\n                \"ref\": \"{{digital_object}}\"\n            }\n        }\n    ],\n    \"deaccessions\": [\n        {\n            \"description\": \"Description 1\",\n            \"reason\": \"Reason 1\",\n            \"disposition\": \"Disposition 1\",\n            \"notification\": true,\n            \"scope\": \"whole\",\n            \"jsonmodel_type\": \"deaccession\",\n            \"extents\": [\n                {\n                    \"number\": \"1\",\n                    \"container_summary\": \"Container Summary\",\n                    \"physical_details\": \"Physical Details\",\n                    \"dimensions\": \"Dimensions\",\n                    \"portion\": \"whole\",\n                    \"extent_type\": \"cubic_feet\",\n                    \"jsonmodel_type\": \"extent\"\n                }\n            ],\n            \"repository\": {\n                \"ref\": \"/repositories/{{REPOSITORY_ID}}\"\n            },\n            \"date\": {\n                \"expression\": \"1900\",\n                \"begin\": \"1900-01-01\",\n                \"date_type\": \"single\",\n                \"label\": \"deaccession\",\n                \"certainty\": \"approximate\",\n                \"era\": \"ce\",\n                \"calendar\": \"gregorian\",\n                \"jsonmodel_type\": \"date\"\n            }\n        },\n        {\n            \"description\": \"Description 2\",\n            \"reason\": \"Reason 2\",\n            \"disposition\": \"Disposition 2\",\n            \"notification\": false,\n            \"scope\": \"whole\",\n            \"jsonmodel_type\": \"deaccession\",\n            \"extents\": [\n                {\n                    \"number\": \".5\",\n                    \"portion\": \"part\",\n                    \"extent_type\": \"gigabytes\",\n                    \"jsonmodel_type\": \"extent\"\n                },\n                {\n                    \"number\": \".5\",\n                    \"portion\": \"part\",\n                    \"extent_type\": \"cubic_feet\",\n                    \"jsonmodel_type\": \"extent\"\n                }\n            ],\n            \"repository\": {\n                \"ref\": \"/repositories/{{REPOSITORY_ID}}\"\n            },\n            \"date\": {\n                \"expression\": \"1900-2000\",\n                \"begin\": \"1900-01-01\",\n                \"end\": \"2000-12-31\",\n                \"date_type\": \"inclusive\",\n                \"label\": \"deaccession\",\n                \"jsonmodel_type\": \"date\"\n            }\n        }\n    ],\n    \"related_accessions\": [\n        {\n            \"ref\": \"{{accession}}\"\n        }\n    ],\n    \"classifications\": [\n        {\n            \"ref\": \"{{classification}}\"\n        }\n    ],\n    \"notes\": [\n        {\n            \"jsonmodel_type\": \"note_singlepart\",\n            \"label\": \"Abstract label\",\n            \"type\": \"abstract\",\n            \"content\": [\n                \"Abstract content\"\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Accruals label\",\n            \"type\": \"accruals\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Accruals content\",\n                    \"publish\": {{$randomBoolean}}\n                },\n                {\n                    \"jsonmodel_type\": \"note_chronology\",\n                    \"title\": \"Chronology note\",\n                    \"items\": [\n                        {\n                            \"event_date\": \"Event Date\",\n                            \"place\": \"Event Place\",\n                            \"events\": [\n                                \"Event Item 1\",\n                                \"Event Item 2\"\n                            ]\n                        }\n                    ],\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Appraisal label\",\n            \"type\": \"appraisal\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Appraisal content\",\n                    \"publish\": {{$randomBoolean}}\n                },\n                {\n                    \"jsonmodel_type\": \"note_definedlist\",\n                    \"title\": \"Defined note\",\n                    \"items\": [\n                        {\n                            \"label\": \"Label 1\",\n                            \"value\": \"Value 1\"\n                        },\n                        {\n                            \"label\": \"Label 2\",\n                            \"value\": \"Value 2\"\n                        }\n                    ],\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Arrangement label\",\n            \"type\": \"arrangement\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Arrangement content\",\n                    \"publish\": {{$randomBoolean}}\n                },\n                {\n                    \"jsonmodel_type\": \"note_orderedlist\",\n                    \"title\": \"Ordered note\",\n                    \"enumeration\": \"arabic\",\n                    \"items\": [\n                        \"Item 1\",\n                        \"Item 2\"\n                    ],\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_bibliography\",\n            \"label\": \"Bibliography label\",\n            \"content\": [\n                \"Bibliography content\"\n            ],\n            \"items\": [\n                \"Bibliography Item 1\",\n                \"Bibliography Item 2\"\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Biographical Historical label\",\n            \"type\": \"bioghist\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Biographical Historical content 1\",\n                    \"publish\": {{$randomBoolean}}\n                },\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Biographical Historical content 2\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Conditions Governing Access label\",\n            \"type\": \"accessrestrict\",\n            \"rights_restriction\": {\n                \"begin\": \"2025-08-01\",\n                \"end\": \"2025-08-08\",\n                \"local_access_restriction_type\": [\n                    \"RestrictedSpecColl\",\n                    \"RestrictedFragileSpecColl\"\n                ]\n            },\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Conditions Governing Access content 1\",\n                    \"publish\": {{$randomBoolean}}\n                },\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Conditions Governing Access content 2\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Conditions Governing Use label\",\n            \"type\": \"userestrict\",\n            \"rights_restriction\": {\n                \"begin\": \"2025-08-01\",\n                \"end\": \"2025-08-08\",\n                \"local_access_restriction_type\": []\n            },\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Conditions Governing Use content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Custodial History label\",\n            \"type\": \"custodhist\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Custodial History content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Custodial History label\",\n            \"type\": \"custodhist\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Custodial History content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Dimensions label\",\n            \"type\": \"dimensions\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Dimensions content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Existence and Location of Copies label\",\n            \"type\": \"altformavail\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Existence and Location of Copies content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Existence and Location of Originals label\",\n            \"type\": \"originalsloc\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Existence and Location of Originals content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"File Plan label\",\n            \"type\": \"fileplan\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"File Plan content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"General label\",\n            \"type\": \"odd\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"General content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Immediate Source of Acquisition label\",\n            \"type\": \"acqinfo\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Immediate Source of Acquisition content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_index\",\n            \"label\": \"Index label\",\n            \"content\": [\n                \"Index content 1\",\n                \"Index content 2\"\n            ],\n            \"items\": [\n                {\n                    \"jsonmodel_type\": \"note_index_item\",\n                    \"value\": \"Value 1\",\n                    \"type\": \"corporate_entity\",\n                    \"reference\": \"Reference 1\",\n                    \"reference_text\": \"Reference Text 1\"\n                },\n                {\n                    \"jsonmodel_type\": \"note_index_item\",\n                    \"value\": \"Value 2\",\n                    \"type\": \"family\",\n                    \"reference\": \"Reference 2\",\n                    \"reference_text\": \"Reference Text 2\"\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Legal Status label\",\n            \"type\": \"legalstatus\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Legal Status content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_singlepart\",\n            \"label\": \"Materials Specific Details label\",\n            \"type\": \"materialspec\",\n            \"content\": [\n                \"Materials Specific Details content\"\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Other Finding Aids label\",\n            \"type\": \"otherfindaid\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Other Finding Aids content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Physical Characteristics and Technical Requirements label\",\n            \"type\": \"phystech\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Physical Characteristics and Technical Requirements content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_singlepart\",\n            \"label\": \"Physical Description label\",\n            \"type\": \"physdesc\",\n            \"content\": [\n                \"Physical Description content\"\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_singlepart\",\n            \"label\": \"Physical Facet label\",\n            \"type\": \"physfacet\",\n            \"content\": [\n                \"Physical Facet content\"\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_singlepart\",\n            \"label\": \"Physical Location label\",\n            \"type\": \"physloc\",\n            \"content\": [\n                \"Physical Location content\"\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Preferred Citation label\",\n            \"type\": \"prefercite\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Preferred Citation content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Processing Information label\",\n            \"type\": \"processinfo\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Processing Information content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Related Materials label\",\n            \"type\": \"relatedmaterial\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Related Materials content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Scope and Contents label\",\n            \"type\": \"scopecontent\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Scope and Contents content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        },\n        {\n            \"jsonmodel_type\": \"note_multipart\",\n            \"label\": \"Separated Materials label\",\n            \"type\": \"separatedmaterial\",\n            \"subnotes\": [\n                {\n                    \"jsonmodel_type\": \"note_text\",\n                    \"content\": \"Separated Materials content\",\n                    \"publish\": {{$randomBoolean}}\n                }\n            ],\n            \"publish\": {{$randomBoolean}}\n        }\n    ],\n    \"metadata_rights_declarations\": [\n        {\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-08-01 00:00:00 UTC\",\n            \"license\": \"public_domain\",\n            \"file_version_xlink_actuate_attribute\": \"none\",\n            \"file_version_xlink_show_attribute\": \"embed\",\n            \"jsonmodel_type\": \"metadata_rights_declaration\"\n        },\n        {\n            \"descriptive_note\": \"Descriptive Note\",\n            \"file_uri\": \"File URI\",\n            \"xlink_title_attribute\": \"Xlink Title Attribute\",\n            \"xlink_role_attribute\": \"Xlink Role Attribute\",\n            \"xlink_arcrole_attribute\": \"Xlink Arcrole Attribute\",\n            \"last_verified_date\": \"2025-08-08 00:00:00 UTC\",\n            \"license\": \"non_commercial_no_derivatives\",\n            \"file_version_xlink_actuate_attribute\": \"other\",\n            \"file_version_xlink_show_attribute\": \"new\",\n            \"jsonmodel_type\": \"metadata_rights_declaration\"\n        }\n    ],\n    \"collection_management\": {\n        \"processing_hours_per_foot_estimate\": \"{{$randomInt}}\",\n        \"processing_total_extent\": \"{{$randomInt}}\",\n        \"processing_hours_total\": \"{{$randomInt}}\",\n        \"processing_plan\": \"Processing Plan\",\n        \"processing_funding_source\": \"Funding Source\",\n        \"processors\": \"Processors\",\n        \"rights_determined\": {{$randomBoolean}},\n        \"processing_total_extent_type\": \"cubic_feet\",\n        \"processing_priority\": \"high\",\n        \"processing_status\": \"in_progress\",\n        \"jsonmodel_type\": \"collection_management\",\n        \"external_ids\": [],\n        \"repository\": {\n            \"ref\": \"/repositories/{{REPOSITORY_ID}}\"\n        }\n}   \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/repositories/{{REPOSITORY_ID}}/resources",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"repositories",
+						"{{REPOSITORY_ID}}",
+						"resources"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Subject Source Enumeration",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var enumValue = pm.response.json()",
+							"enumValue.values.push(\"nmaict\");",
+							"pm.collectionVariables.set(\"post_body\", enumValue);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/config/enumerations/23",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"config",
+						"enumerations",
+						"23"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add to Subject Source Enumeration",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var postBody = pm.collectionVariables.get(\"post_body\");",
+							"pm.collectionVariables.set(\"replace_me\", JSON.stringify(postBody));"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{{replace_me}}"
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/config/enumerations/23",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"config",
+						"enumerations",
+						"23"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Content Warning Enumeration",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var enumValue = pm.response.json()",
+							"enumValue.values.push(\"cw_animal\", \"cw_childabuse\", \"cw_birth\", \"cw_crime\", \"cw_deceased\", \"cw_graphic\", \"cw_medical\", \"cw_records\", \"cw_nudity\", \"cw_minors\");",
+							"pm.collectionVariables.set(\"post_body\", enumValue);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/config/enumerations/103",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"config",
+						"enumerations",
+						"103"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add to Content Warning Enumeration",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var postBody = pm.environment.get(\"post_body\");",
+							"pm.collectionVariables.set(\"replace_me\", JSON.stringify(postBody));"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{{replace_me}}"
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/config/enumerations/23",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"config",
+						"enumerations",
+						"23"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Finding Aid Status Enumeration",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var enumValue = pm.response.json()",
+							"enumValue.values.push(\"publish\");",
+							"pm.collectionVariables.set(\"post_body\", enumValue);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/config/enumerations/21",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"config",
+						"enumerations",
+						"21"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add to Publish to Finding Aid Status Enumeration",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.get(\"resetValue\").forEach((a)=>pm.collectionVariables.set(a.key,a.value))"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var postBody = pm.collectionVariables.get(\"post_body\");",
+							"pm.collectionVariables.set(\"replace_me\", JSON.stringify(postBody));"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ArchivesSpace-Session",
+						"value": "{{SESSION}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{{replace_me}}"
+				},
+				"url": {
+					"raw": "{{ASPACE_BACKEND_URL}}/config/enumerations/21",
+					"host": [
+						"{{ASPACE_BACKEND_URL}}"
+					],
+					"path": [
+						"config",
+						"enumerations",
+						"21"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "ACCESSION_COUNT",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "AO_COUNT",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "ASSESSMENT_COUNT",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "CLASSIFICATION_COUNT",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "COLL_MGMT_COUNT",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "CONTAINER_COUNT",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "CONTAINER_PROFILE_COUNT",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "CULT_SUBJ",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "DO_COUNT",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "EVENT_COUNT",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "FUNC_SUBJ",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "GENRE_SUBJ",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "GEOG_SUBJ",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "LAST_RESOURCE",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "LOCATION_COUNT",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "LOCATION_PROFILE_COUNT",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "OCC_SUBJ",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "post_body",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "replace_me",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "RESOURCE_COUNT",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "STYLE_SUBJ",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "SUBJECT_SOURCE",
+			"value": ""
+		},
+		{
+			"key": "SUBJECT_TERM",
+			"value": ""
+		},
+		{
+			"key": "SUBJECT_TERMS",
+			"value": "[\"cultural_context\", \"function\", \"genre_form\", \"geographic\", \"occupation\", \"style_period\", \"technique\", \"temporal\", \"topical\", \"uniform_title\"]",
+			"type": "string"
+		},
+		{
+			"key": "TECH_SUBJ",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "TEMP_SUBJ",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "TOP_SUBJ",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "TITLE_SUBJ",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "REPOSITORY_ID",
+			"value": ""
+		}
+	]
+}
